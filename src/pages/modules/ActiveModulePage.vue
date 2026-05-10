@@ -16,7 +16,7 @@
       />
       <q-item
         class="row q-mt-sm"
-        :v-ripple="selectedModule != null"
+        v-ripple
         clickable
         @click="setModuleEnabled(!moduleEnabled)"
         :disable="selectedModule == null"

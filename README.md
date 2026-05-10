@@ -1,6 +1,6 @@
-# ITArmyKit
+# CyberOwl
 
-Десктопний застосунок на Quasar, Vue 3, Electron і TypeScript для налаштування та запуску підтримуваних модулів IT Army.
+Десктопний застосунок на Quasar, Vue 3, Electron і TypeScript для налаштування та запуску підтримуваних модулів Corpus.
 
 ## Вимоги
 
@@ -27,4 +27,4 @@
 
 - Пакування налаштоване в `quasar.config.js`.
 - Windows-збірки використовують `electron-builder` з NSIS.
-- Робочі дані застосунку зберігаються в `ITArmyKitProfile` всередині Electron `appData`.
+- Робочі дані застосунку зберігаються в `CyberOwlProfile` всередині Electron `appData`.

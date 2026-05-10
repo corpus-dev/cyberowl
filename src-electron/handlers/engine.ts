@@ -59,9 +59,9 @@ export class ExecutionEngine {
     })
   }
 
-  private static stateFilePath = path.join(app.getPath('appData'), 'ITArmyKitProfile', 'engine.state.json')
-  private static stateBackupFilePath = path.join(app.getPath('appData'), 'ITArmyKitProfile', 'engine.state.json.bak')
-  private static stateTempFilePath = path.join(app.getPath('appData'), 'ITArmyKitProfile', 'engine.state.json.tmp')
+  private static stateFilePath = path.join(app.getPath('appData'), 'CyberOwlProfile', 'engine.state.json')
+  private static stateBackupFilePath = path.join(app.getPath('appData'), 'CyberOwlProfile', 'engine.state.json.bak')
+  private static stateTempFilePath = path.join(app.getPath('appData'), 'CyberOwlProfile', 'engine.state.json.tmp')
 
   private modules: Array<Distress | MHDDOSProxy> = []
   private runningModule: Distress | MHDDOSProxy | null
@@ -414,7 +414,7 @@ export class ExecutionEngine {
       try {
         const settingsData = await this.settings.getData()
         if (settingsData.execution?.moduleToRun) {
-          this.state.moduleToRun = settingsData.execution.moduleToRun
+          this.state.moduleToRun = settingsData.execution.moduleToRun as ModuleName | undefined
           console.warn('[ExecutionEngine] Recovered moduleToRun from settings')
           this.logEvent('warn', 'module-recovered-from-settings', { moduleToRun: this.state.moduleToRun })
           await this.setState(this.state)

@@ -1,17 +1,17 @@
 {
-  "name": "itarmykit",
-  "version": "1.6.4",
-  "description": "ITArmyKit",
-  "productName": "ITArmyKit",
+  "name": "cyberowl",
+  "version": "1.0.0",
+  "description": "CyberOwl",
+  "productName": "CyberOwl",
   "author": {
-    "name": "it army dev",
-    "email": "armyuait@gmail.com",
-    "url": "https://github.com/it-army-ua-scripts"
+    "name": "corpus kit dev",
+    "email": "REPLACE_WITH_AUTHOR_EMAIL",
+    "url": "https://github.com/corpus-dev"
   },
   "private": false,
   "license": "GPL-3.0",
-  "repository": "https://github.com/it-army-ua-scripts/itarmykit",
-  "homepage": "https://itarmy.com.ua",
+  "repository": "https://github.com/corpus-dev/corpusowl",
+  "homepage": "https://github.com/corpus-dev",
   "scripts": {
     "lint": "eslint --ext .js,.ts,.vue ./",
     "lintfix": "eslint --fix --ext .js,.ts,.vue ./",
@@ -20,6 +20,7 @@
     "smoke:stability": "node_modules/.bin/tsc -p tsconfig.smoke.json && node .tmp-smoke/scripts/smoke/stability-smoke.js"
   },
   "dependencies": {
+    "@quasar/cli": "^4.0.0",
     "@quasar/extras": "^1.16.4",
     "apexcharts": "^4.5.0",
     "async-mutex": "^0.5.0",

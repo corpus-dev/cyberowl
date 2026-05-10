@@ -49,18 +49,18 @@
 
         <q-step
             :name="3"
-            :title="$t('bootstrap.header.itarmy')"
+            :title="$t('bootstrap.header.corpus')"
             icon="add_comment"
             :done="step > 3"
             :header-nav="step > 3"
         >
-            <div class="q-mb-md">{{ $t('bootstrap.itarmy.body') }}</div>
-            <div class="q-mb-md">{{ $t('settings.idDescription') }} <a href="https://itarmy.com.ua/statistics/" target="_blank" rel="noopener noreferrer">https://itarmy.com.ua</a></div>
-            <q-input :label="$t('bootstrap.itarmy.uuidInputTitle')" outlined v-model="itArmyUUID" @update:model-value="setItArmyUUID" :debounce="500" type="number"/>
+            <div class="q-mb-md">{{ $t('bootstrap.corpus.body') }}</div>
+            <div class="q-mb-md">{{ $t('settings.idDescription') }} <a href="https://github.com/corpus-dev/statistics/" target="_blank" rel="noopener noreferrer">https://github.com/corpus-dev</a></div>
+            <q-input :label="$t('bootstrap.corpus.uuidInputTitle')" outlined v-model="corpusUUID" @update:model-value="setCorpusUUID" :debounce="500" type="number"/>
 
             <q-stepper-navigation class="row q-col-gutter-sm">
-                <q-btn @click="step = 2" color="primary" :label="$t('bootstrap.itarmy.backButton')" class="q-mr-sm col-12 col-sm-auto q-mb-sm" outline />
-            <q-btn @click="finishItArmyStep" color="primary" :label="$t('bootstrap.itarmy.continueButton')" class="col-12 col-sm q-mb-sm" outline />
+                <q-btn @click="step = 2" color="primary" :label="$t('bootstrap.corpus.backButton')" class="q-mr-sm col-12 col-sm-auto q-mb-sm" outline />
+            <q-btn @click="finishCorpusStep" color="primary" :label="$t('bootstrap.corpus.continueButton')" class="col-12 col-sm q-mb-sm" outline />
             </q-stepper-navigation>
         </q-step>
 
@@ -178,16 +178,16 @@ async function changeDataFolder () {
 }
 
 async function finishDataStep () {
-  await window.settingsAPI.bootstrap.setStep('ITARMY_UUID')
+  await window.settingsAPI.bootstrap.setStep('CORPUS_UUID')
   step.value = 3
 }
 
-const itArmyUUID = ref('')
-async function setItArmyUUID (newValue: string | number | null) {
-  await window.settingsAPI.itarmy.setUUID(String(newValue))
+const corpusUUID = ref('')
+async function setCorpusUUID (newValue: string | number | null) {
+  await window.settingsAPI.corpus.setUUID(String(newValue))
 }
 
-async function finishItArmyStep () {
+async function finishCorpusStep () {
   await window.settingsAPI.bootstrap.setStep('MODULES_CONFIGURATION')
   step.value = 4
 }
@@ -219,7 +219,7 @@ async function moduleInstalledSuccessfully () {
 async function loadSettings () {
   const settings = await window.settingsAPI.get()
   dataFolder.value = settings.modules.dataPath
-  itArmyUUID.value = settings.itarmy.uuid
+  corpusUUID.value = settings.corpus.uuid
 }
 
 onMounted(async () => {

@@ -50,7 +50,7 @@ export class Distress extends Module<Config> {
   private invalidJsonLineCount = 0
 
   public override get name (): ModuleName { return 'DISTRESS' }
-  public override get homeURL (): string { return 'https://github.com/Yneth/distress-releases' }
+  public override get homeURL (): string { return 'https://github.com/corpus-dev/distress_releases' }
   public override get supportedInstallationTargets (): Array<InstallationTarget> {
     return [
       { arch: 'x64', platform: 'linux' },
@@ -76,7 +76,7 @@ export class Distress extends Module<Config> {
   }
 
   override async getAllVersions (): Promise<Version[]> {
-    return await this.loadVersionsFromGithub('Yneth', 'distress-releases')
+    return await this.loadVersionsFromGithub('corpus-dev', 'distress_releases')
   }
 
   private assetMapping = [
@@ -95,7 +95,7 @@ export class Distress extends Module<Config> {
   }>
 
   override async *installVersion (versionTag: string): AsyncGenerator<InstallProgress, void, void> {
-    const progressGenerator = this.installVersionFromGithub('Yneth', 'distress-releases', versionTag, this.assetMapping)
+    const progressGenerator = this.installVersionFromGithub('corpus-dev', 'distress_releases', versionTag, this.assetMapping)
 
     for await (const progress of progressGenerator) {
       yield progress
@@ -107,8 +107,8 @@ export class Distress extends Module<Config> {
     const config = await this.getConfig()
 
     const args = [] as string[]
-    if (settings.itarmy.uuid !== '') {
-      args.push('--user-id', settings.itarmy.uuid)
+    if (settings.corpus.uuid !== '') {
+      args.push('--user-id', settings.corpus.uuid)
     }
     args.push('--child', '--json-logs')
     if (config.concurrency > 0) {
@@ -129,7 +129,7 @@ export class Distress extends Module<Config> {
     if (config.useMyIP > 0 && config.EnablePACKETFlood) {
       args.push('--enable-packet-flood')
     }
-    args.push('--source', 'itarmykit')
+    args.push('--source', 'cyberowl')
     args.push(...config.executableArguments.filter(arg => arg !== ''))
 
     let filename = 'distress_x86_64-unknown-linux-musl'

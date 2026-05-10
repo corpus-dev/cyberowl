@@ -31,7 +31,7 @@ function emptyPeriodTopData (): PeriodTopData {
 
 async function getTopData (): Promise<TopData> {
   try {
-    const response = await electronNetFetch('https://itarmy.com.ua/leaderboard/json/leaderboard.json')
+    const response = await electronNetFetch('https://github.com/corpus-dev/leaderboard/json/leaderboard.json')
     if (response.status !== 200) {
       return {
         success: false,

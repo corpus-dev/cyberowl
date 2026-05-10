@@ -11,8 +11,8 @@ import { writeStabilityLog } from 'app/lib/utils/stabilityLog'
 
 const platform = process.platform || os.platform()
 
-const APP_DISPLAY_NAME = 'IT Army Kit'
-const APP_ID = 'itarmykit'
+const APP_DISPLAY_NAME = 'Cyber Owl'
+const APP_ID = 'cyberowl'
 const desktopNameApp = app as App & { setDesktopName?: (name: string) => void }
 
 app.setName(APP_DISPLAY_NAME)
@@ -194,8 +194,8 @@ async function checkWindowsRuntimePrerequisite () {
   await dialog.showMessageBox({
     type: 'warning',
     title: 'Microsoft Visual C++ Redistributable may be missing',
-    message: 'ITArmyKit detected that the required Microsoft Visual C++ runtime may be missing.',
-    detail: 'The app was installed, but some modules may fail to start. If you see module startup errors, install the Microsoft Visual C++ Redistributable for this system and restart ITArmyKit.'
+    message: 'Cyber Owl detected that the required Microsoft Visual C++ runtime may be missing.',
+    detail: 'The app was installed, but some modules may fail to start. If you see module startup errors, install the Microsoft Visual C++ Redistributable for this system and restart Cyber Owl.'
   })
 }
 

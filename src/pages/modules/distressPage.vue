@@ -12,7 +12,7 @@
             >Author:
             <a
               class="text-primary cursor-pointer"
-              href="https://github.com/Yneth"
+              href="https://github.com/corpus-dev"
               target="_blank"
               >Yneth</a
             ></span
@@ -23,9 +23,9 @@
             >Repository:
             <a
               class="text-primary"
-              href="https://github.com/Yneth/distress-releases"
+              href="https://github.com/corpus-dev/distress_releases"
               target="_blank"
-              >https://github.com/Yneth/distress-releases</a
+              >https://github.com/corpus-dev/distress_releases</a
             ></span
           >
         </div>
@@ -42,7 +42,7 @@
               class="text-primary"
               href="https://t.me/+H6PnjkydZX0xNDky"
               target="_blank"
-              >IT Army Chat</a
+              >Corpus Chat</a
             ></span
           >
         </div>

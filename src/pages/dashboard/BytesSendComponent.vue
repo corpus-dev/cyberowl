@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <q-card flat bordered class="row bg-transparent full-height items-stretch" style="height: 100%;">
     <div class="stat-icon-box">
       <q-icon name="fa-solid fa-arrow-up"></q-icon>
@@ -30,7 +30,7 @@ import {
 } from 'app/lib/module/module'
 import { IpcRendererEvent } from 'electron'
 import { onMounted, onUnmounted, ref } from 'vue'
-import { useItArmyStats } from 'src/composables/useItArmyStats'
+import { useCorpusStats } from 'src/composables/useCorpusStats'
 
 const totalBytesSend = ref(0)
 const bps = ref(0)
@@ -77,7 +77,7 @@ async function loadLastStatistics () {
 const {
   totalTraffic: totalBytesSendFromAllTools,
   hasData: totalStatisticsAvailable
-} = useItArmyStats()
+} = useCorpusStats()
 
 onMounted(async () => {
   await loadLastStatistics()
@@ -88,3 +88,4 @@ onUnmounted(() => {
   window.executionEngineAPI.stopListeningForStatistics(onStatisticsUpdate)
 })
 </script>
+

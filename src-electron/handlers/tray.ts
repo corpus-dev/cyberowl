@@ -37,7 +37,7 @@ function showHiddenInTrayNotification (locale: 'en-US' | 'ua-UA' | 'de-DE') {
   }
 
   new Notification({
-    title: 'IT Army Kit',
+    title: 'Cyber Owl',
     body: hiddenInTrayMessageByLocale[locale],
     silent: true
   }).show()
@@ -64,7 +64,7 @@ export function handleTray (settings: Settings, mainWindow: BrowserWindow) {
     tray = new Tray(nativeImage.createEmpty())
     const appIcon = nativeImage.createFromPath(path.resolve(__dirname, 'icons/trey.png'))
     tray.setImage(appIcon)
-    tray.setToolTip('IT Army Kit')
+    tray.setToolTip('Cyber Owl')
     tray.on('double-click', () => {
       if (!activeMainWindow || activeMainWindow.isDestroyed()) {
         return

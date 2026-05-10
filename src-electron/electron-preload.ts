@@ -28,14 +28,7 @@ import type { State as ExecutionEngineState, ExecutionLogEntry } from './handler
 import type { TopData } from './handlers/top'
 import type { SettingsData } from './handlers/settings'
 import type { Contributor } from './handlers/developers'
-import type {
-  GetStatsResponse as GetActivenessStatsResponse,
-  GetTasksListResponse as GetActivenessTasksListResponse,
-  LoginResponse as ActivenessLoginResponse,
-  MakeTaskDoneResponse as MakeActivenessTaskDoneResponse,
-  IgnoreTaskResponse as IgnoreActivenessTaskResponse
-} from '../lib/activeness/api'
-import type { GetUserStatsResponse as GetITArmyUserStatsResponse } from '../lib/itarmy/api'
+import type { GetUserStatsResponse as GetCorpusUserStatsResponse } from '../lib/corpus/api'
 
 type ModuleConfig = DistressConfig | MHDDOSProxyConfig
 type RendererListener<T> = (_e: IpcRendererEvent, data: T) => void
@@ -211,12 +204,12 @@ const settingsAPI = {
       await invoke<void>('settings:modules:deleteData')
     }
   },
-  itarmy: {
-    async setUUID (data: SettingsData['itarmy']['uuid']): Promise<void> {
-      await invoke<void>('settings:itarmy:uuid', data)
+  corpus: {
+    async setUUID (data: SettingsData['corpus']['uuid']): Promise<void> {
+      await invoke<void>('settings:corpus:uuid', data)
     },
-    async setAPIKey (data: SettingsData['itarmy']['apiKey']): Promise<void> {
-      await invoke<void>('settings:itarmy:apiKey', data)
+    async setAPIKey (data: SettingsData['corpus']['apiKey']): Promise<void> {
+      await invoke<void>('settings:corpus:apiKey', data)
     }
   },
   bootstrap: {
@@ -265,40 +258,14 @@ const developersAPI = {
 }
 contextBridge.exposeInMainWorld('developersAPI', developersAPI)
 
-const activenessAPI = {
-  async isLoggedIn (): Promise<boolean> {
-    return await invoke<boolean>('activeness:isLoggedIn')
-  },
-  async login (email: string, password: string): Promise<ActivenessLoginResponse> {
-    return await invoke<ActivenessLoginResponse>('activeness:login', email, password)
-  },
-  async logout (): Promise<void> {
-    await invoke<void>('activeness:logout')
-  },
-  async getTasksList (): Promise<GetActivenessTasksListResponse> {
-    return await invoke<GetActivenessTasksListResponse>('activeness:getTasksList')
-  },
-  async makeTaskDone (id: number): Promise<MakeActivenessTaskDoneResponse> {
-    return await invoke<MakeActivenessTaskDoneResponse>('activeness:makeTaskDone', id)
-  },
-  async ignoreTask (id: number): Promise<IgnoreActivenessTaskResponse> {
-    return await invoke<IgnoreActivenessTaskResponse>('activeness:ignoreTask', id)
-  },
-  async getStats (): Promise<GetActivenessStatsResponse> {
-    return await invoke<GetActivenessStatsResponse>('activeness:getStats')
-  },
-  async getMyStats (): Promise<{ score: number }> {
-    return await invoke<{ score: number }>('activeness:getMyStats')
-  }
-}
-contextBridge.exposeInMainWorld('activenessAPI', activenessAPI)
 
-const itArmyAPI = {
-  async getStats (): Promise<GetITArmyUserStatsResponse> {
-    return await invoke<GetITArmyUserStatsResponse>('itarmy:getStats')
+
+const corpusAPI = {
+  async getStats (): Promise<GetCorpusUserStatsResponse> {
+    return await invoke<GetCorpusUserStatsResponse>('corpus:getStats')
   }
 }
-contextBridge.exposeInMainWorld('itArmyAPI', itArmyAPI)
+contextBridge.exposeInMainWorld('corpusAPI', corpusAPI)
 
 export interface SystemUsage {
   cpuPercent: number
@@ -335,8 +302,7 @@ declare global {
     topAPI: typeof topAPI
     settingsAPI: typeof settingsAPI
     developersAPI: typeof developersAPI
-    activenessAPI: typeof activenessAPI
-    itArmyAPI: typeof itArmyAPI
+    corpusAPI: typeof corpusAPI
     systemAPI: typeof systemAPI
     helpersAPI: typeof helpersAPI
   }

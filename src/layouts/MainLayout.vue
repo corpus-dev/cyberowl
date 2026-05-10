@@ -1,6 +1,4 @@
 <template>
-  <MatrixCanvas />
-  <EasterModeDecor />
   <q-layout view="lHh Lpr lFf" class="app-shell-layout">
     <q-header bordered class="app-shell-header">
       <q-toolbar>
@@ -23,59 +21,20 @@
 
         <div>
           v{{ version }}
-          <!--
-          <q-btn flat class="q-pa-sm q-ma-xs" @click="showMurkaDialog = true">
-            <q-avatar
-              style="outline: 2px solid #555"
-              class="cursor-pointer"
-              square
-            >
-              <img src="./snowEffect/murka_the_cat.jpg" />
-            </q-avatar>
-            <q-tooltip> Slamy's (developer) cat </q-tooltip>
-          </q-btn>
-          -->
-
-          <q-dialog v-model="showMurkaDialog">
-            <MurkaDialog />
-          </q-dialog>
         </div>
       </q-toolbar>
     </q-header>
 
     <q-drawer v-model="leftDrawerOpen" :width="260" show-if-above bordered class="app-shell-drawer">
       <q-list>
-        <q-item-label header class="text-center text-bold text-uppercase text-h4 q-mt-md q-mb-md app-nav-title">
-          IT Army Kit
-          <!--🎅-->
+        <q-item-label header class="text-center text-bold text-uppercase app-nav-title">
+          {{ $t("layout.appName") }}
         </q-item-label>
-        <div class="row justify-center q-mb-md app-logo-wrap">
-          <div
-            v-if="appearanceStore.modeId === 'easter'"
-            class="logo-easter-eggs"
-            aria-hidden="true"
-          >
-            <span class="logo-easter-egg logo-easter-egg--1"></span>
-            <span class="logo-easter-egg logo-easter-egg--2"></span>
-            <span class="logo-easter-egg logo-easter-egg--3"></span>
-            <span class="logo-easter-egg logo-easter-egg--4"></span>
-            <span class="logo-easter-egg logo-easter-egg--5"></span>
-            <span class="logo-easter-egg logo-easter-egg--6"></span>
-            <span class="logo-easter-egg logo-easter-egg--7"></span>
-            <span class="logo-easter-egg logo-easter-egg--8"></span>
-            <span class="logo-easter-egg logo-easter-egg--9"></span>
-            <span class="logo-easter-egg logo-easter-egg--10"></span>
-            <span class="logo-easter-egg logo-easter-egg--11"></span>
-            <span class="logo-easter-egg logo-easter-egg--12"></span>
-            <span class="logo-easter-egg logo-easter-egg--13"></span>
-            <span class="logo-easter-egg logo-easter-egg--14"></span>
-            <span class="logo-easter-egg logo-easter-egg--15"></span>
-            <span class="logo-easter-egg logo-easter-egg--16"></span>
-          </div>
-          <img src="~assets/icon.png" class="app-logo q-mt-sm" alt="IT Army Kit" />
+        <div class="row justify-center app-logo-wrap">
+          <img src="~assets/icon.png" class="app-logo" alt="Cyber Owl" />
         </div>
 
-        <div class="row" style="border-top: solid 1px #aaa">
+        <div class="row app-nav-list">
           <div
             v-for="page of pages"
             :key="page.name"
@@ -83,12 +42,7 @@
             @click="goToPage(page.page)"
           >
             <div
-              class="col bg-yellow-7"
-              style="
-                max-width: 6px;
-                border-bottom: solid 1px #aaa;
-                border-right: solid 1px #aaa;
-              "
+              class="col app-nav-active-rail"
               v-if="($route.name as string).startsWith(page.name)"
             ></div>
             <div
@@ -96,21 +50,19 @@
                 'col text-subtitle1 text-bold q-pl-md selectable_menu app-nav-item',
                 ($route.name as string).startsWith(page.name) ? 'app-nav-item--active' : ''
               ]"
-              style="border-bottom: solid 1px #aaa"
             >
               <q-icon size="xs" :name="page.icon" class="q-mr-xs"></q-icon>
               {{ $t(page.title) }}
             </div>
           </div>
         </div>
-        <div class="q-pa-sm">
+        <div class="app-control-wrap">
           <SystemControlStatusComponent />
         </div>
       </q-list>
     </q-drawer>
 
     <q-page-container>
-      <!-- <SnowEffectComponent /> -->
       <router-view />
     </q-page-container>
   </q-layout>
@@ -123,13 +75,8 @@ import { version } from '../../package.json'
 
 const router = useRouter()
 
-import MatrixCanvas from './MatrixCanvas.vue'
-import EasterModeDecor from './EasterModeDecor.vue'
-import MurkaDialog from './snowEffect/MurkaDialog.vue'
-
 import ShortStatisticsComponent from './ShortStatisticsComponent.vue'
 import SystemControlStatusComponent from 'src/pages/dashboard/SystemControlStatusComponent.vue'
-import { useAppearanceStore } from 'src/appearance/store'
 
 const pages = [
   {
@@ -142,13 +89,7 @@ const pages = [
     name: 'modules',
     title: 'layout.modules',
     page: 'modules_active',
-    icon: 'fa-solid fa-layer-group'
-  },
-  {
-    name: 'activeness',
-    title: 'layout.activeness',
-    page: 'activeness',
-    icon: 'fa-solid fa-globe'
+    icon: 'apps'
   },
   {
     name: 'settings',
@@ -162,7 +103,8 @@ const pages = [
     page: 'schedule',
     icon: 'schedule'
   },
-  { name: 'top', title: 'layout.top', page: 'top', icon: 'leaderboard' },
+  // TODO: Рейтинги — тимчасово прибрано до відновлення серверу статистики
+  // { name: 'top', title: 'layout.top', page: 'top', icon: 'leaderboard' },
   {
     name: 'developers',
     title: 'layout.developers',
@@ -177,7 +119,6 @@ const pages = [
 }>
 
 const leftDrawerOpen = ref(false)
-const appearanceStore = useAppearanceStore()
 
 function toggleLeftDrawer () {
   leftDrawerOpen.value = !leftDrawerOpen.value
@@ -186,8 +127,6 @@ function toggleLeftDrawer () {
 async function goToPage (page: string) {
   await router.push({ name: page })
 }
-
-const showMurkaDialog = ref(false)
 </script>
 
 <style lang="scss" scoped>
@@ -197,251 +136,91 @@ const showMurkaDialog = ref(false)
 }
 
 .app-shell-header {
-  background: var(--app-shell-surface);
+  background:
+    linear-gradient(90deg, var(--app-shell-surface-strong), var(--app-shell-surface));
   color: var(--app-shell-text);
+  border-bottom: 1px solid var(--app-nav-border);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
 }
 
 .app-shell-drawer {
-  background: var(--app-shell-surface);
+  background:
+    linear-gradient(180deg, var(--app-shell-surface-strong) 0%, var(--app-shell-surface) 42%, #d6d0b5 100%);
   color: var(--app-shell-text);
+  border-right: 1px solid var(--app-nav-border);
 }
 
-.easter-side-badge__egg {
-  width: 12px;
-  height: 16px;
-  border-radius: 50% 50% 46% 46% / 58% 58% 42% 42%;
-  background: linear-gradient(180deg, #fde68a 0%, #f59e0b 100%);
-  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.4);
+.app-shell-drawer :deep(.q-drawer__content) {
+  background:
+    linear-gradient(180deg, var(--app-shell-surface-strong) 0%, var(--app-shell-surface) 48%, #d6d0b5 100%);
+  color: var(--app-shell-text);
+  overflow-y: auto;
 }
 
-.easter-side-badge__egg--blue {
-  background: linear-gradient(180deg, #93c5fd 0%, #2563eb 100%);
-}
-
-.easter-side-badge__egg--pink {
-  background: linear-gradient(180deg, #f9a8d4 0%, #db2777 100%);
+:global(body.app-theme--dark) .app-shell-drawer,
+:global(body.app-theme--dark) .app-shell-drawer :deep(.q-drawer__content) {
+  background:
+    linear-gradient(180deg, var(--app-shell-surface-strong) 0%, var(--app-shell-surface) 48%, #252a19 100%);
 }
 
 .app-nav-title {
   color: var(--app-shell-text-muted);
+  font-size: 28px;
+  letter-spacing: 0.04em;
+  line-height: 1.18;
+  padding: 18px 12px 10px;
 }
 
 .app-nav-item {
   color: var(--app-shell-text);
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--app-nav-border);
+  transition: background-color 0.18s ease, color 0.18s ease;
+}
+
+:global(body.app-theme--dark) .app-nav-title,
+:global(body.app-theme--dark) .app-nav-item {
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.38);
 }
 
 .app-nav-item--active {
-  background: var(--app-nav-active-bg);
+  background:
+    linear-gradient(90deg, rgba(194, 143, 44, 0.28), transparent 72%),
+    var(--app-nav-active-bg);
+  color: #fff7d8;
+}
+
+.app-nav-list {
+  border-top: 1px solid var(--app-nav-border);
+}
+
+.app-nav-active-rail {
+  max-width: 6px;
+  background: var(--app-accent-warm);
+  border-bottom: 1px solid var(--app-nav-border);
+  box-shadow: 0 0 14px rgba(194, 143, 44, 0.45);
 }
 
 .app-logo {
-  width: 96px;
-  height: 96px;
+  width: 132px;
+  height: 132px;
   object-fit: contain;
+  filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.34));
 }
 
 .app-logo-wrap {
-  margin-top: -24px;
+  margin-top: 2px;
+  margin-bottom: 12px;
   position: relative;
-  width: 170px;
-  height: 150px;
+  width: 180px;
+  height: 138px;
   margin-left: auto;
   margin-right: auto;
 }
 
-.logo-easter-eggs {
-  position: absolute;
-  inset: 0 0 auto 0;
-  width: 170px;
-  height: 150px;
-  pointer-events: none;
-}
-
-.logo-easter-egg {
-  position: absolute;
-  width: 14px;
-  height: 18px;
-  border-radius: 50% 50% 46% 46% / 58% 58% 42% 42%;
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.35),
-    0 6px 10px rgba(15, 23, 42, 0.16),
-    0 0 16px rgba(255, 255, 255, 0.08);
-  animation: logo-easter-egg-float 4.2s ease-in-out infinite;
-}
-
-.logo-easter-egg--1 {
-  left: 8px;
-  top: 16px;
-  background: linear-gradient(180deg, #facc15 0%, #fb923c 100%);
-}
-
-.logo-easter-egg--2 {
-  left: 22px;
-  top: 42px;
-  width: 10px;
-  height: 14px;
-  background: linear-gradient(180deg, #93c5fd 0%, #2563eb 100%);
-  animation-delay: 0.5s;
-  animation-name: logo-easter-egg-bob;
-}
-
-.logo-easter-egg--3 {
-  right: 12px;
-  top: 12px;
-  background: linear-gradient(180deg, #f9a8d4 0%, #db2777 100%);
-  animation-delay: 1s;
-}
-
-.logo-easter-egg--4 {
-  right: 26px;
-  top: 42px;
-  width: 11px;
-  height: 15px;
-  background: linear-gradient(180deg, #86efac 0%, #16a34a 100%);
-  animation-delay: 1.4s;
-  animation-name: logo-easter-egg-sway;
-}
-
-.logo-easter-egg--5 {
-  left: 10px;
-  bottom: 18px;
-  width: 12px;
-  height: 16px;
-  background: linear-gradient(180deg, #fde68a 0%, #f59e0b 100%);
-  animation-delay: 0.8s;
-}
-
-.logo-easter-egg--6 {
-  left: 34px;
-  bottom: 10px;
-  width: 10px;
-  height: 14px;
-  background: linear-gradient(180deg, #c4b5fd 0%, #7c3aed 100%);
-  animation-delay: 1.8s;
-  animation-name: logo-easter-egg-bob;
-}
-
-.logo-easter-egg--7 {
-  right: 28px;
-  bottom: 18px;
-  width: 12px;
-  height: 16px;
-  background: linear-gradient(180deg, #93c5fd 0%, #2563eb 100%);
-  animation-delay: 2.1s;
-}
-
-.logo-easter-egg--8 {
-  right: 8px;
-  bottom: 10px;
-  width: 10px;
-  height: 14px;
-  background: linear-gradient(180deg, #f9a8d4 0%, #db2777 100%);
-  animation-delay: 2.6s;
-  animation-name: logo-easter-egg-sway;
-}
-
-.logo-easter-egg--9 {
-  left: 0;
-  top: 64px;
-  width: 9px;
-  height: 12px;
-  background: linear-gradient(180deg, #5eead4 0%, #0f766e 100%);
-  animation-delay: 0.9s;
-}
-
-.logo-easter-egg--10 {
-  right: 0;
-  top: 66px;
-  width: 9px;
-  height: 12px;
-  background: linear-gradient(180deg, #fda4af 0%, #e11d48 100%);
-  animation-delay: 1.7s;
-}
-
-.logo-easter-egg--11 {
-  left: 48px;
-  top: 12px;
-  width: 8px;
-  height: 11px;
-  background: linear-gradient(180deg, #bfdbfe 0%, #1d4ed8 100%);
-  animation-delay: 2.3s;
-  animation-name: logo-easter-egg-bob;
-}
-
-.logo-easter-egg--12 {
-  right: 52px;
-  top: 6px;
-  width: 8px;
-  height: 11px;
-  background: linear-gradient(180deg, #fdba74 0%, #ea580c 100%);
-  animation-delay: 0.3s;
-}
-
-.logo-easter-egg--13 {
-  left: 52px;
-  bottom: 2px;
-  width: 8px;
-  height: 11px;
-  background: linear-gradient(180deg, #ddd6fe 0%, #7c3aed 100%);
-  animation-delay: 1.1s;
-  animation-name: logo-easter-egg-sway;
-}
-
-.logo-easter-egg--14 {
-  right: 56px;
-  bottom: 0;
-  width: 8px;
-  height: 11px;
-  background: linear-gradient(180deg, #bbf7d0 0%, #15803d 100%);
-  animation-delay: 2.8s;
-}
-
-.logo-easter-egg--15 {
-  left: 18px;
-  top: 108px;
-  width: 9px;
-  height: 12px;
-  background: linear-gradient(180deg, #fef08a 0%, #ca8a04 100%);
-  animation-delay: 3.1s;
-}
-
-.logo-easter-egg--16 {
-  right: 16px;
-  top: 106px;
-  width: 9px;
-  height: 12px;
-  background: linear-gradient(180deg, #fecdd3 0%, #be185d 100%);
-  animation-delay: 3.4s;
-  animation-name: logo-easter-egg-bob;
-}
-
-@keyframes logo-easter-egg-float {
-  0%, 100% {
-    transform: translateY(0) rotate(0deg) scale(1);
-  }
-
-  50% {
-    transform: translateY(-5px) rotate(6deg) scale(1.06);
-  }
-}
-
-@keyframes logo-easter-egg-bob {
-  0%, 100% {
-    transform: translateY(0) scale(1);
-  }
-
-  50% {
-    transform: translateY(-7px) scale(1.08);
-  }
-}
-
-@keyframes logo-easter-egg-sway {
-  0%, 100% {
-    transform: rotate(-4deg) translateY(0);
-  }
-
-  50% {
-    transform: rotate(5deg) translateY(-4px);
-  }
+.app-control-wrap {
+  padding: 8px 10px;
 }
 </style>

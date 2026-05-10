@@ -1,15 +1,15 @@
-// This is just an example,
+﻿// This is just an example,
 // so you can safely delete all default props below
 
 export default {
   layout: {
-    dashboard: 'Main',
-    modules: 'DDOS Modules',
-    activeness: 'Activeness',
+    dashboard: 'Dashboard',
+    modules: 'Modules',
     settings: 'Settings',
-    schedule: 'Scheduling',
-    top: 'Rankings',
-    developers: 'Developers'
+    schedule: 'Schedule',
+    top: 'Leaderboard',
+    developers: 'Developers',
+    appName: 'Cyber Owl'
   },
   schedule: {
     title: 'Scheduling',
@@ -96,8 +96,6 @@ export default {
     volunteers: 'TOP VOLUNTEERS',
     week: 'Per Week',
     month: 'Per Month',
-    activeness: 'Activeness',
-
     achievements: {
       peopleAreLikeShips: {
         title: 'People are like Ships',
@@ -112,9 +110,6 @@ export default {
       }
     },
 
-    activenessData: {
-      notifyLoadFailed: 'Failed to load activeness statistics. Error: {error}'
-    }
   },
   bootstrap: {
     title: "Looks like this is your first launch. Let's help you",
@@ -122,7 +117,7 @@ export default {
     header: {
       language: 'Choose Language',
       data: 'Data',
-      itarmy: 'ITArmy ID',
+      corpus: 'Corpus ID',
       module: 'Modules'
     },
 
@@ -139,9 +134,9 @@ export default {
       backButton: 'Back'
     },
 
-    itarmy: {
-      body: 'If you have an ITArmy ID, enter it below. If not, press the continue button',
-      uuidInputTitle: 'ITArmy ID',
+    corpus: {
+      body: 'If you have a Corpus ID, enter it below. If not, press the continue button',
+      uuidInputTitle: 'Corpus ID',
       continueButton: 'Continue',
       backButton: 'Back'
     },
@@ -189,14 +184,8 @@ export default {
     system: 'System',
     look: 'GUI',
     theme: 'Theme',
-    mode: 'Mode',
     themeLight: 'Light',
     themeDark: 'Dark',
-    locked: 'locked',
-    modeDefault: 'Default',
-    modeEaster: 'Easter',
-    modeMatrix: 'Matrix',
-    modeLockedHint: 'Additional modes appear here after they are unlocked.',
     darkMode: 'Dark Mode',
     matrixMode: 'Matrix Mode',
     autoUpdates: 'Automatic Updates',
@@ -223,17 +212,7 @@ export default {
       openProfileFolder: 'Profile folder',
       openStabilityLog: 'Stability log'
     },
-    matrixQuiz: {
-      header: 'Wake up, {name} ...',
-      body: 'You are genno-modified ukrnazi from west Ukraine laboratories. We are all brain-washed and think the same. Answer associations (first what is on your mind) to prove that.',
 
-      q1: 'What is rustling?',
-      q2: 'Who is putin?',
-      q3: 'What is dried up?',
-
-      cancell: 'Wake up as nothing happened',
-      submit: 'Down to the rabbit hole'
-    }
   },
 
   dashboard: {
@@ -274,80 +253,23 @@ export default {
         h6: '6h'
       }
     },
-    activeness: {
-      score: 'Activeness Score'
-    },
-    itarmyAPIKeyEmpty: 'IT Army ID is not specified. It is not critical, but it is necessary for displaying general statistics. You can specify it in the settings.'
+    corpusAPIKeyEmpty: 'Corpus ID is not specified. It is not critical, but it is necessary for displaying general statistics. You can specify it in the settings.'
   },
 
   developers: {
-    itaySubtitle: 'A community of Ukrainian IT specialists, created at the end of February 2022 to neutralize the enemy in information and cyberspace after the start of the Russian invasion of Ukraine on February 24, 2022.',
+    itaySubtitle: '',
     shieldMore: 'Learn more about us and our operations:',
     partners: 'Colleges and Partners',
     contacts: 'Contacts',
-    contactP1: 'For questions about the application, first, ask in the IT Army chat:',
+    contactP1: 'For questions about the application, first, ask in the Corpus chat:',
     contactP1_1: 'or, as a last resort, on our channel',
     contactP1_2: 'If you write to us on the channel, remember that we have very few resources and might not respond. But usually, there are community members who can help.',
     contactP2: 'Technical problems with the application - if you know how to use Github, please create an issue in the repository',
-    contactP2_1: 'if not - ask in the IT Army chat.',
+    contactP2_1: 'if not - ask in the Corpus chat.',
     contactP3: 'Questions about modules - direct them to the module developers.',
     contributors: 'Contributors',
     contributorsSubtitle: 'Help improve the program and your name will automatically appear in this list. The list also shows contributors to the previous version of the application and some modules.'
   },
 
-  activeness: {
-    login: {
-      title: 'Activeness Login',
-      email: 'Email',
-      password: 'Password',
-      info: 'Unfortunatelly, activeness requires additional login to be used. In future we will try to provide one login to all the IT Army services. If you dont know what is the Activeness, visit https://activeness.social/',
-      loginButton: 'Login / Register',
-      failed: 'Login failed. Check your email and password and try again.',
-      networkFailed: 'Login failed because the activeness service is unavailable or your network connection is down.'
-    },
-    tasksTable: {
-      title: 'Tasks',
-      id: 'ID',
-      what: 'What to do',
-      link: 'Link',
-      description: 'Description',
-      actions: 'Actions',
-      priority: 'This task is priority. It is very important to do it first.'
-    },
-
-    logoutButton: 'Logout',
-    suggesttarget: 'Suggest my target',
-    actions: {
-      done: 'Done',
-      ignore: 'Ignore',
-      openFirst: 'Open the link first'
-    },
-    summary: {
-      subtitle: 'Open the target, complete the report, then mark the task or skip it.',
-      available: 'Available tasks',
-      priority: 'Priority tasks',
-      nextStep: 'Next step',
-      nextStepHint: 'Open the first priority task and finish it before moving on.',
-      tip: 'Tip: use the green button after you finish the report, and use Ignore only for tasks you cannot process.',
-      emptyTitle: 'No tasks right now',
-      emptyBody: 'Refresh later or suggest a new target for the team.',
-      noDescription: 'No additional details',
-      priorityTag: 'Priority'
-    },
-
-    notifyTaskLoadFailed: 'Failed to load tasks. Error: {error}',
-    notifyFailedToMakeTaskDone: 'Failed to make task done. Error: {error}',
-    notifyFailedTOIgnoreTask: 'Failed to ignore task. Error: {error}',
-    errors: {
-      clickTooFast: 'You are acting too fast. Please wait a few seconds and try again.',
-      invalidTaskId: 'This task is no longer available. Please refresh the list.',
-      openTaskFirst: 'Open the task link first, then mark it as done.',
-      sidExpired: 'Your activeness session has expired. Please log in again.',
-      sidCheckFail: 'Your activeness session is no longer valid for this account. Please log in again.',
-      sessionExpired: 'Your activeness session has expired. Please log in again.',
-      doneRejected: 'The activeness service rejected the completion request ({error}).',
-      ignoreRejected: 'The activeness service rejected the ignore request ({error}).',
-      unknown: 'Unknown activeness error.'
-    }
-  }
 }
+

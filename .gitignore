@@ -40,3 +40,6 @@ yarn-error.log*
 vc_redist.x64.exe
 vc_redist.arm64.exe
 .tmp-smoke
+
+# Local notes with sensitive migration info
+NOTES.md

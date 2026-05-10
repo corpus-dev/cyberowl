@@ -18,7 +18,7 @@ export const DEFAULT_ELECTRON_REQUEST_TIMEOUT_MS = 30_000
 
 function createTimeout (request: ClientRequest, timeoutMs: number) {
   return setTimeout(() => {
-    request.destroy(new Error(`Request timed out after ${timeoutMs}ms`))
+    request.abort()
   }, timeoutMs)
 }
 
@@ -170,7 +170,7 @@ export async function electronNetDownloadFile (
     })
 
     fileStream.on('error', async (error) => {
-      request.destroy(error)
+      request.abort()
       await cleanup()
       finish(() => reject(error))
     })

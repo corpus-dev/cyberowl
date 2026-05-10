@@ -117,7 +117,7 @@ export class MHDDOSProxy extends Module<Config> {
   private workerMonitorInterval?: ReturnType<typeof setInterval>
 
   public override get name (): ModuleName { return 'MHDDOS_PROXY' }
-  public override get homeURL (): string { return 'https://github.com/porthole-ascend-cinnamon/mhddos_proxy_releases' }
+  public override get homeURL (): string { return 'https://github.com/corpus-dev/mhddos_proxy' }
   public override get supportedInstallationTargets (): Array<InstallationTarget> {
     return [
       { arch: 'x64', platform: 'linux' },
@@ -139,7 +139,7 @@ export class MHDDOSProxy extends Module<Config> {
   }
 
   override async getAllVersions (): Promise<Version[]> {
-    return await this.loadVersionsFromGithub('porthole-ascend-cinnamon', 'mhddos_proxy_releases')
+    return await this.loadVersionsFromGithub('corpus-dev', 'mhddos_proxy')
   }
 
   private assetMapping = [
@@ -155,7 +155,7 @@ export class MHDDOSProxy extends Module<Config> {
   }>
 
   override async *installVersion (versionTag: string): AsyncGenerator<InstallProgress, void, void> {
-    const progressGenerator = this.installVersionFromGithub('porthole-ascend-cinnamon', 'mhddos_proxy_releases', versionTag, this.assetMapping)
+    const progressGenerator = this.installVersionFromGithub('corpus-dev', 'mhddos_proxy', versionTag, this.assetMapping)
 
     for await (const progress of progressGenerator) {
       yield progress
@@ -258,8 +258,8 @@ export class MHDDOSProxy extends Module<Config> {
     const config = await this.getConfig()
 
     const args: string[] = []
-    if (settings.itarmy.uuid !== '') {
-      args.push('--user-id', settings.itarmy.uuid)
+    if (settings.corpus.uuid !== '') {
+      args.push('--user-id', settings.corpus.uuid)
     }
     args.push('--no-updates')
     if (config.copies !== 0) {
@@ -274,7 +274,7 @@ export class MHDDOSProxy extends Module<Config> {
     if (config.useMyIP > 0) {
       args.push('--use-my-ip', config.useMyIP.toString())
     }
-    args.push('--source', 'itarmykit')
+    args.push('--source', 'cyberowl')
     args.push(...removeCustomLanguageArguments(config.executableArguments.filter((arg) => arg !== '')))
     args.push('--lang', lang)
 

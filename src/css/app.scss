@@ -1,72 +1,124 @@
 // app global css in SCSS form
 
 body {
-  --app-shell-surface: #ffffff;
-  --app-shell-text: #111827;
-  --app-shell-text-muted: #111827;
-  --app-nav-hover-bg: #dddddd;
-  --app-nav-active-bg: #e5e7eb;
-  --app-stat-icon-bg: #ffd836;
-  --app-panel-bg: rgba(248, 250, 252, 0.62);
-  --app-panel-border: rgba(148, 163, 184, 0.28);
-  --app-panel-header-border: rgba(148, 163, 184, 0.2);
-  --app-log-bg: rgba(241, 245, 249, 0.72);
-  --app-log-text: #111827;
-  --app-matrix-accent: #16a34a;
-  --app-matrix-accent-muted: #166534;
-  --app-dialog-bg: #f8fafc;
-  --app-input-bg: #e5e7eb;
-  --app-soft-surface: rgba(255, 255, 255, 0.78);
-  --app-soft-border: rgba(148, 163, 184, 0.24);
-  --app-muted-text: #6b7280;
-  --app-accent-warm: #f59e0b;
-  --app-accent-cool: #3b82f6;
+  --app-shell-surface: #dedbc8;
+  --app-shell-surface-strong: #c9c4a8;
+  --app-shell-text: #202515;
+  --app-shell-text-muted: #606447;
+  --app-nav-hover-bg: rgba(194, 143, 44, 0.12);
+  --app-nav-active-bg: #52652d;
+  --app-nav-border: rgba(72, 86, 45, 0.22);
+  --app-stat-icon-bg: #52652d;
+  --app-panel-bg: rgba(248, 247, 239, 0.94);
+  --app-panel-border: rgba(72, 86, 45, 0.28);
+  --app-panel-header-border: rgba(72, 86, 45, 0.18);
+  --app-panel-shadow: 0 16px 36px rgba(17, 20, 15, 0.1);
+  --app-log-bg: #202218;
+  --app-log-text: #d9d4bd;
+  --app-matrix-accent: #76884b;
+  --app-matrix-accent-muted: #52652d;
+  --app-dialog-bg: #232719;
+  --app-input-bg: #f0eee1;
+  --app-soft-surface: rgba(239, 237, 224, 0.72);
+  --app-soft-border: rgba(72, 86, 45, 0.22);
+  --app-muted-text: #737762;
+  --app-accent-warm: #c28f2c;
+  --app-accent-cool: #3e7782;
+  --app-danger: #9d3030;
+  --app-grid-line: rgba(72, 86, 45, 0.16);
+  --app-camo-a: rgba(82, 101, 45, 0.08);
+  --app-camo-b: rgba(194, 143, 44, 0.06);
 }
 
 body.app-theme--light {
-  --app-shell-surface: #ffffff;
-  --app-shell-text: #111827;
-  --app-shell-text-muted: #111827;
-  --app-nav-hover-bg: #dddddd;
-  --app-nav-active-bg: #e5e7eb;
-  --app-stat-icon-bg: #ffd836;
-  --app-panel-bg: rgba(248, 250, 252, 0.62);
-  --app-panel-border: rgba(148, 163, 184, 0.28);
-  --app-panel-header-border: rgba(148, 163, 184, 0.2);
-  --app-log-bg: rgba(241, 245, 249, 0.72);
-  --app-log-text: #111827;
-  --app-matrix-accent: #16a34a;
-  --app-matrix-accent-muted: #166534;
-  --app-dialog-bg: #f8fafc;
-  --app-input-bg: #e5e7eb;
-  --app-soft-surface: rgba(255, 255, 255, 0.78);
-  --app-soft-border: rgba(148, 163, 184, 0.24);
-  --app-muted-text: #6b7280;
-  --app-accent-warm: #f59e0b;
-  --app-accent-cool: #3b82f6;
+  --app-shell-surface: #e4e0ca;
+  --app-shell-surface-strong: #c8c19f;
+  --app-shell-text: #202515;
+  --app-shell-text-muted: #616448;
+  --app-nav-hover-bg: rgba(82, 101, 45, 0.14);
+  --app-nav-active-bg: #5b6e34;
+  --app-stat-icon-bg: #5b6e34;
+  --app-panel-bg: rgba(249, 248, 240, 0.96);
+  --app-panel-border: rgba(69, 82, 45, 0.26);
+  --app-panel-header-border: rgba(69, 82, 45, 0.2);
+  --app-log-bg: #24261c;
+  --app-log-text: #e3dec6;
+  --app-matrix-accent: #52652d;
+  --app-matrix-accent-muted: #76884b;
+  --app-dialog-bg: #f4f1e5;
+  --app-input-bg: #edeadd;
+  --app-soft-surface: rgba(237, 234, 221, 0.7);
+  --app-soft-border: rgba(69, 82, 45, 0.22);
+  --app-muted-text: #747761;
+  --app-accent-warm: #b6842d;
+  --app-accent-cool: #3e7782;
 }
 
 body.app-theme--dark {
-  --app-shell-surface: #1d1d1d;
-  --app-shell-text: #f3f4f6;
-  --app-shell-text-muted: #f3f4f6;
-  --app-nav-hover-bg: #334155;
-  --app-nav-active-bg: #000000;
-  --app-stat-icon-bg: #2a364d;
-  --app-panel-bg: rgba(15, 23, 42, 0.38);
-  --app-panel-border: rgba(148, 163, 184, 0.24);
-  --app-panel-header-border: rgba(148, 163, 184, 0.2);
-  --app-log-bg: rgba(15, 23, 42, 0.45);
-  --app-log-text: #e5e7eb;
-  --app-matrix-accent: #86efac;
-  --app-matrix-accent-muted: #4ade80;
-  --app-dialog-bg: #111827;
-  --app-input-bg: rgba(30, 41, 59, 0.92);
-  --app-soft-surface: rgba(30, 41, 59, 0.72);
-  --app-soft-border: rgba(148, 163, 184, 0.2);
-  --app-muted-text: #9ca3af;
-  --app-accent-warm: #f59e0b;
-  --app-accent-cool: #60a5fa;
+  --app-shell-surface: #13170e;
+  --app-shell-surface-strong: #0b0e09;
+  --app-shell-text: #e7e0c4;
+  --app-shell-text-muted: #9fa083;
+  --app-nav-hover-bg: rgba(194, 143, 44, 0.14);
+  --app-nav-active-bg: #4d612c;
+  --app-stat-icon-bg: #354323;
+  --app-panel-bg: rgba(24, 28, 18, 0.92);
+  --app-panel-border: rgba(112, 130, 72, 0.34);
+  --app-panel-header-border: rgba(112, 130, 72, 0.22);
+  --app-panel-shadow: 0 18px 42px rgba(0, 0, 0, 0.22);
+  --app-log-bg: #0f120c;
+  --app-log-text: #d4cfb8;
+  --app-matrix-accent: #76884b;
+  --app-matrix-accent-muted: #4d612c;
+  --app-dialog-bg: #181c12;
+  --app-input-bg: #24291a;
+  --app-soft-surface: rgba(44, 50, 31, 0.72);
+  --app-soft-border: rgba(112, 130, 72, 0.25);
+  --app-muted-text: #8b8b72;
+  --app-accent-warm: #c28f2c;
+  --app-accent-cool: #4f9aa4;
+}
+
+body,
+.q-layout,
+.q-page-container,
+.q-page {
+  background:
+    linear-gradient(135deg, var(--app-camo-a) 0 18%, transparent 18% 42%, var(--app-camo-b) 42% 54%, transparent 54%),
+    linear-gradient(180deg, #f6f4ea 0%, #ece9d8 100%);
+}
+
+body.app-theme--dark,
+body.app-theme--dark .q-layout,
+body.app-theme--dark .q-page-container,
+body.app-theme--dark .q-page {
+  background:
+    linear-gradient(135deg, rgba(82, 101, 45, 0.12) 0 18%, transparent 18% 42%, rgba(194, 143, 44, 0.06) 42% 54%, transparent 54%),
+    linear-gradient(180deg, #11140f 0%, #171b12 100%);
+}
+
+.q-card {
+  border-radius: 8px;
+  border-color: var(--app-panel-border);
+  box-shadow: var(--app-panel-shadow);
+}
+
+.app-shell-drawer,
+.app-shell-drawer .q-drawer__content {
+  background:
+    linear-gradient(180deg, var(--app-shell-surface-strong) 0%, var(--app-shell-surface) 48%, #d6d0b5 100%) !important;
+  color: var(--app-shell-text);
+}
+
+body.app-theme--dark .app-shell-drawer,
+body.app-theme--dark .app-shell-drawer .q-drawer__content {
+  background:
+    linear-gradient(180deg, var(--app-shell-surface-strong) 0%, var(--app-shell-surface) 48%, #252a19 100%) !important;
+}
+
+.app-shell-drawer .q-list {
+  min-height: 100%;
+  background: transparent;
 }
 
 /* === Stat cards === */
@@ -74,16 +126,25 @@ body.app-theme--dark {
   width: 72px;
   min-width: 72px;
   height: 100%;
-  border-radius: 8px 0 0 8px;
+  border-radius: 6px 0 0 6px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--app-stat-icon-bg);
+  background:
+    linear-gradient(135deg, rgba(0, 0, 0, 0.18), transparent 58%),
+    var(--app-stat-icon-bg);
   align-self: stretch;
+  color: #080a06;
+  border-right: 1px solid rgba(236, 232, 212, 0.16);
 }
 
 .stat-icon-box .q-icon {
   font-size: 32px;
+}
+
+.text-grey,
+.text-grey-7 {
+  color: var(--app-muted-text) !important;
 }
 
 /* === Mode: Matrix === */

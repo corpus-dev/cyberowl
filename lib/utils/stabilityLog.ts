@@ -45,7 +45,7 @@ export function getStabilityLogPath () {
   // Lazy-load Electron so the logger can also be used from plain Node smoke scripts.
   const electronModule = require('electron') as { app?: { getPath: (name: string) => string } }
   const appDataPath = electronModule.app?.getPath('appData') ?? process.cwd()
-  return path.join(appDataPath, 'ITArmyKitProfile', 'stability.log')
+  return path.join(appDataPath, 'CyberOwlProfile', 'stability.log')
 }
 
 function rotateLogIfNeeded (filePath: string, maxBytes: number) {

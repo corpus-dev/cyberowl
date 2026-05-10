@@ -6,7 +6,6 @@
     <q-tabs v-model="activeTab" dense class="top-tabs">
       <q-tab name="weekly" :label="$t('top.week')" />
       <q-tab name="monthly" :label="$t('top.month')" />
-      <q-tab name="activeness" :label="$t('top.activeness')" />
     </q-tabs>
 
     <q-separator class="q-mb-sm" />
@@ -58,38 +57,15 @@
           </q-card>
         </div>
       </q-tab-panel>
-      <q-tab-panel name="activeness" class="bg-transparent">
-        <div class="top-list">
-          <q-card
-            v-for="(row, idx) in activenessTop10"
-            :key="row.name + row.score"
-            flat
-            bordered
-            class="top-list-item"
-            :class="idx < 3 ? 'top-list-item--leader' : ''"
-          >
-            <div v-if="idx < 3" class="top-list-rank">#{{ idx + 1 }}</div>
 
-            <div class="top-list-label">Name</div>
-            <div class="top-list-value">{{ row.name }}</div>
-
-            <div class="top-list-label">Score</div>
-            <div class="top-list-value">{{ row.score }}</div>
-          </q-card>
-        </div>
-      </q-tab-panel>
     </q-tab-panels>
   </q-page>
 </template>
 
 <script setup lang="ts">
-import { UserStat } from 'app/lib/activeness/api'
 import { useQuasar } from 'quasar'
 import { ref, onMounted } from 'vue'
-import { useI18n } from 'vue-i18n'
-
 const $q = useQuasar()
-const $i18n = useI18n()
 
 const activeTab = ref('weekly')
 
@@ -151,26 +127,8 @@ async function loadTop () {
   }
 }
 
-const activenessTop10 = ref<UserStat[]>([])
-async function loadActiveness () {
-  const stats = await window.activenessAPI.getStats()
-  if (stats.status !== 'ok') {
-    $q.notify({
-      message: $i18n.t('top.activenessData.notifyLoadFailed', {
-        error: JSON.stringify(stats)
-      }),
-      type: 'negative',
-      timeout: 5000
-    })
-    return
-  }
-
-  activenessTop10.value = stats.top10
-}
-
 onMounted(async () => {
   await loadTop()
-  await loadActiveness()
 })
 </script>
 

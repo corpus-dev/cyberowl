@@ -71,10 +71,12 @@ onUnmounted(() => {
 
 <style scoped>
 .execution-log-scroll {
-    border: 1px solid rgba(148, 163, 184, 0.28);
-    border-radius: 12px;
+    border: 1px solid rgba(112, 130, 72, 0.32);
+    border-radius: 8px;
     border-color: var(--app-panel-border);
-    background: var(--app-log-bg);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 18px),
+        var(--app-log-bg);
 }
 
 .execution-log-pre {
@@ -86,5 +88,6 @@ onUnmounted(() => {
     line-height: 1.45;
     font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace;
     color: var(--app-log-text);
+    text-shadow: 0 0 10px rgba(194, 143, 44, 0.08);
 }
 </style>

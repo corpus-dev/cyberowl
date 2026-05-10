@@ -7,8 +7,7 @@ import { handleUpdater } from './updater'
 import { Settings, handleSettings } from './settings'
 import { handleDevelopers } from './developers'
 import { handleTray } from './tray'
-import { handleActiveness } from './activeness'
-import { handleItArmy } from './itarmy'
+import { handleCorpus } from './corpus'
 import { handleHelpers } from './helpers'
 import { BrowserWindow } from 'electron'
 import { handleSchedule } from './schedule'
@@ -37,8 +36,7 @@ function initMainProcessContext (): MainProcessContext {
   handleUpdater(settings, engine)
   handleSettings(settings, engine)
   handleDevelopers()
-  handleActiveness(settings)
-  handleItArmy(settings)
+  handleCorpus(settings)
   handleSchedule(settings, engine)
   handleHelpers()
   handleSystem()

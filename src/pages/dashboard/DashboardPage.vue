@@ -8,13 +8,10 @@
         <BytesSendComponent />
       </div>
       <div class="col-xs-12 col-sm-6 col-lg-3 q-pa-xs d-flex">
-        <ActivenessScoreComponent />
-      </div>
-      <div class="col-xs-12 col-sm-6 col-lg-3 q-pa-xs d-flex">
-        <ItArmyIDComponent />
+        <CorpusIDComponent />
       </div>
     </div>
-    <q-card class="row q-mt-sm q-pa-md bg-transparent" flat bordered>
+    <q-card class="dashboard-panel row q-mt-sm q-pa-md" flat bordered>
       <q-card-section class="text-bold text-h5 q-pa-none q-pl-md">{{
         $t('dashboard.statistics')
       }}</q-card-section>
@@ -38,15 +35,20 @@
 <script lang="ts" setup>
 import ModuleStatusComponent from './ModuleStatusComponent.vue'
 import BytesSendComponent from './BytesSendComponent.vue'
-import ItArmyIDComponent from './ItArmyIDComponent.vue'
+import CorpusIDComponent from './CorpusIDComponent.vue'
 import BitrateChartComponent from './BitrateChartComponent.vue'
 import CombinedLogOutputComponent from '../modules/CombinedLogOutputComponent.vue'
-import ActivenessScoreComponent from './ActivenessScoreComponent.vue'
 </script>
 
 <style scoped>
 .execution-log-card {
-  border-radius: 12px;
+  border-radius: 8px;
+  background: var(--app-panel-bg);
+  border-color: var(--app-panel-border);
+}
+
+.dashboard-panel {
+  border-radius: 8px;
   background: var(--app-panel-bg);
   border-color: var(--app-panel-border);
 }

@@ -126,36 +126,39 @@
 
       <!-- END TODO -->
 
+      <!-- TODO: ID та API Key — тимчасово прибрано до відновлення серверу статистики -->
+      <!--
       <q-card-section>
-        <div class="text-h6">IT Army of Ukraine</div>
+        <div class="text-h6">{{ $t("layout.appName") }}</div>
         <span
           >{{ $t("settings.idDescription") }}
           <a
-            href="https://itarmy.com.ua/statistics/"
+            href="https://github.com/corpus-dev/statistics/"
             target="_blank"
             rel="noopener noreferrer"
-            >https://itarmy.com.ua</a
+            >https://github.com/corpus-dev</a
           >
         </span>
         <q-separator class="q-mt-xs q-mb-sm" />
         <q-input
           outlined
-          label="IT Army ID"
-          v-model="itArmyUUID"
-          @update:model-value="setItArmyUUID"
+          label="Corpus ID"
+          v-model="corpusUUID"
+          @update:model-value="setCorpusUUID"
           debounce="500"
           type="number"
         />
-        <q-input onkeyup="this.value = this.value.replace(/\s/g, '')"
+        <q-input
           outlined
-          label="IT Army API Key"
+          label="Corpus API Key"
           class="q-mt-sm"
-          v-model.trim="itArmyAPIKey"
-          @update:model-value="setItArmyAPIKey"
+          v-model="corpusAPIKey"
+          @update:model-value="setCorpusAPIKey"
           debounce="500"
           type="password"
         />
       </q-card-section>
+      -->
 
       <q-card-section>
         <div class="text-h6">{{ $t("settings.look") }}</div>
@@ -174,27 +177,7 @@
               :model-value="selectedThemeId"
               :options="themeOptions"
               @update:model-value="setTheme"
-            />
-          </q-item-section>
-        </q-item>
-
-        <q-item>
-          <q-item-section>
-            <q-item-label>{{ $t("settings.mode") }}</q-item-label>
-            <q-item-label v-if="!appearanceStore.isModeUnlocked('matrix')" caption>
-              {{ $t("settings.modeLockedHint") }}
-            </q-item-label>
-          </q-item-section>
-          <q-item-section side top>
-            <q-select
-              dense
-              outlined
-              emit-value
-              map-options
-              style="min-width: 180px"
-              :model-value="selectedModeId"
-              :options="modeOptions"
-              @update:model-value="setMode"
+              label="Theme"
             />
           </q-item-section>
         </q-item>
@@ -287,7 +270,7 @@
     </q-card>
   </q-dialog>
 
-  <q-dialog v-model="deleteModuelsCacheDialog">
+  <q-dialog v-model="deleteModulesCacheDialog">
     <q-card class="q-pa-md" flat style="border: solid 3px red">
       <q-card-section class="text-center text-h5 text-bold">
         {{ $t("settings.warnDelCache") }}
@@ -321,14 +304,7 @@
     </q-card>
   </q-dialog>
 
-  <q-dialog v-model="matrixModeQuizDialog" persistent>
-    <MatrixModeQuizDialog
-      @on-close="
-        matrixModeQuizDialog = false;
-        void loadSettings();
-      "
-    />
-  </q-dialog>
+
 </template>
 
 <script lang="ts" setup>
@@ -338,9 +314,8 @@ import LanguageSelectorComponent from './settings/LanguageSelectorComponent.vue'
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import { appearanceModes, appearanceThemes } from 'src/appearance/catalog'
 import { useAppearanceStore } from 'src/appearance/store'
-import MatrixModeQuizDialog from './settings/MatrixModeQuizDialog.vue'
+
 
 const $q = useQuasar()
 const { t } = useI18n()
@@ -379,14 +354,14 @@ async function openProfileFolder () {
 async function openStabilityLog () {
   await window.helpersAPI.openStabilityLog()
 }
-const itArmyUUID = ref('')
-async function setItArmyUUID (newValue: string | number | null) {
-  await window.settingsAPI.itarmy.setUUID(String(newValue))
+const corpusUUID = ref('')
+async function setCorpusUUID (newValue: string | number | null) {
+  await window.settingsAPI.corpus.setUUID(String(newValue))
 }
 
-const itArmyAPIKey = ref('')
-async function setItArmyAPIKey (newValue: string | number | null) {
-  await window.settingsAPI.itarmy.setAPIKey(String(newValue))
+const corpusAPIKey = ref('')
+async function setCorpusAPIKey (newValue: string | number | null) {
+  await window.settingsAPI.corpus.setAPIKey(String(newValue).replace(/\s/g, ''))
 }
 
 const deleteStatisticsDialog = ref(false)
@@ -395,7 +370,7 @@ async function deleteStatistics () {
   deleteStatisticsDialog.value = false
 }
 
-const deleteModuelsCacheDialog = ref(false)
+const deleteModulesCacheDialog = ref(false)
 async function deleteModulesCache () {
   await window.settingsAPI.modules.deleteData()
 }
@@ -407,49 +382,16 @@ async function deleteAllData () {
   await loadSettings()
 }
 
+const themeOptions = ref<Array<{label: string, value: string}>>([
+  { label: 'Light', value: 'light' },
+  { label: 'Dark', value: 'dark' }
+])
+
 const selectedThemeId = ref(appearanceStore.themeId)
 async function setTheme (themeId: string) {
   await appearanceStore.setTheme(themeId)
-  selectedThemeId.value = appearanceStore.themeId
   appearanceStore.applyRuntimeAppearance($q.dark)
-}
-
-const selectedModeId = ref(appearanceStore.modeId)
-const matrixModeQuizDialog = ref(false)
-
-const themeOptions = computed(() => appearanceThemes.map((theme) => ({
-  label: t(theme.labelKey),
-  value: theme.id
-})))
-
-const modeOptions = computed(() => appearanceModes.map((mode) => ({
-  label: mode.id === 'matrix' && !appearanceStore.isModeUnlocked('matrix')
-    ? `${t(mode.labelKey)} (${t('settings.locked')})`
-    : t(mode.labelKey),
-  value: mode.id
-})))
-
-async function openMatrixQuizIfAvailable () {
-  if (!itArmyUUID.value) {
-    selectedModeId.value = appearanceStore.modeId
-    return
-  }
-
-  matrixModeQuizDialog.value = true
-}
-
-async function setMode (modeId: string) {
-  if (modeId === 'matrix' && !appearanceStore.isModeUnlocked('matrix')) {
-    await openMatrixQuizIfAvailable()
-    selectedModeId.value = appearanceStore.modeId
-    return
-  }
-
-  const applied = await appearanceStore.setMode(modeId)
-  if (!applied && modeId === 'matrix') {
-    await openMatrixQuizIfAvailable()
-  }
-  selectedModeId.value = appearanceStore.modeId
+  selectedThemeId.value = appearanceStore.themeId
 }
 
 async function loadSettings () {
@@ -458,11 +400,10 @@ async function loadSettings () {
   systemAutoStartup.value = settings.system.startOnBoot
   systemHideInTray.value = settings.system.hideInTray
   modulesDataFolderPath.value = settings.modules.dataPath
-  itArmyUUID.value = settings.itarmy.uuid
-  itArmyAPIKey.value = settings.itarmy.apiKey
+  corpusUUID.value = settings.corpus.uuid
+  corpusAPIKey.value = settings.corpus.apiKey
   appearanceStore.hydrate(settings.gui)
   selectedThemeId.value = appearanceStore.themeId
-  selectedModeId.value = appearanceStore.modeId
 }
 
 onMounted(async () => {

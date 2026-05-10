@@ -222,8 +222,8 @@ module.exports = configure(function (/* ctx */) {
         linux: {
           icon: 'src-electron/icons/icon.icns',
           desktop: {
-            Name: 'IT Army Kit',
-            StartupWMClass: 'itarmykit'
+            Name: 'Cyber Owl',
+            StartupWMClass: 'cyberowl'
           },
           target: [
             {
@@ -238,7 +238,7 @@ module.exports = configure(function (/* ctx */) {
         },
 
         artifactName: '$' + '{name}-$' + '{os}-$' + '{arch}.$' + '{ext}',
-        appId: 'itarmykit',
+        appId: 'cyberowl',
 
         publish: {
           provider: 'github',

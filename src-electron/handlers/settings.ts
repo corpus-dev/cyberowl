@@ -2,7 +2,7 @@ import { join as joinPath } from 'path'
 import { app, ipcMain } from 'electron'
 import { promises as fsPromises, readFileSync, existsSync, mkdirSync, writeFileSync } from 'fs'
 import EventEmitter from 'events'
-import { SID } from 'app/lib/activeness/api'
+
 import { writeFileAtomicWithBackup } from 'app/lib/utils/atomicFile'
 import type { ExecutionEngine } from './engine'
 
@@ -20,24 +20,13 @@ export interface SettingsData {
     startOnBoot: boolean
     language: 'en-US' | 'ua-UA' | 'de-DE'
   }
-  modules: {
-    dataPath: string
-  }
-  schedule: {
-    enabled: boolean
-    startTime: string
-    endTime: string
-    activity: 'DO_NOTHING' | 'MINIMAL'
-    modules: Array<'DISTRESS' | 'MHDDOS_PROXY'>
-    intervals: ScheduleInterval[]
-  }
-  itarmy: {
+  corpus: {
     uuid: string
     apiKey: string
   }
   bootstrap: {
-    step: 'LANGUAGE' | 'DATA_FOLDER' | 'MODULES_CONFIGURATION' | 'ITARMY_UUID' | 'DONE'
-    selectedModulesConfig: 'NONE' | 'GOVERNMENT_AGENCY' | 'WORK' | 'HOME'
+    step: string
+    selectedModulesConfig: string
   }
   gui: {
     theme: string
@@ -45,87 +34,30 @@ export interface SettingsData {
     unlockedModes: string[]
     lastSeenAppVersion: string
   }
-  activeness: {
-    sid?: SID
-    score: number
+  schedule: {
+    enabled: boolean
+    startTime: string
+    endTime: string
+    activity: 'DO_NOTHING' | 'MINIMAL'
+    modules: string[]
+    intervals: ScheduleInterval[]
   }
-  execution: {
-    moduleToRun?: 'DISTRESS' | 'MHDDOS_PROXY'
+  modules: {
+    dataPath: string
   }
+  execution: Record<string, unknown>
 }
 
-export type SettingsChangedEventHandler = (newData: SettingsData) => void
+type SettingsChangedEventHandler = (data: SettingsData) => void
 
-function parseTimeToMinutes (time: string): number | null {
-  const parts = time.split(':')
-  if (parts.length !== 2) {
-    return null
-  }
-  const hours = Number(parts[0])
-  const minutes = Number(parts[1])
-  if (!Number.isInteger(hours) || !Number.isInteger(minutes)) {
-    return null
-  }
-  if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) {
-    return null
-  }
-  return hours * 60 + minutes
-}
+export class Settings extends EventEmitter {
+  static get settingsFile () { return joinPath(Settings.profileDir, 'settings.json') }
+  static get settingsTempFile () { return joinPath(Settings.profileDir, 'settings.json.tmp') }
+  static get settingsBackupFile () { return joinPath(Settings.profileDir, 'settings.json.bak') }
+  static profileDir = joinPath(app.getPath('appData'), 'CyberOwlProfile')
 
-function validateScheduleIntervalsNoOverlap (intervals: ScheduleInterval[]) {
-  const segmentsByDay = new Map<number, Array<{ start: number, end: number }>>()
-  for (let day = 0; day <= 6; day++) {
-    segmentsByDay.set(day, [])
-  }
-
-  for (const interval of intervals) {
-    const start = parseTimeToMinutes(interval.startTime)
-    const end = parseTimeToMinutes(interval.endTime)
-    if (start === null || end === null) {
-      throw new Error(`Invalid interval time format: ${interval.startTime}-${interval.endTime}`)
-    }
-
-    const days = Array.from(new Set((interval.days || []).filter((day) => Number.isInteger(day) && day >= 0 && day <= 6)))
-    for (const day of days) {
-      if (start === end) {
-        segmentsByDay.get(day)?.push({ start: 0, end: 1440 })
-        continue
-      }
-
-      if (start < end) {
-        segmentsByDay.get(day)?.push({ start, end })
-        continue
-      }
-
-      segmentsByDay.get(day)?.push({ start, end: 1440 })
-      const nextDay = (day + 1) % 7
-      segmentsByDay.get(nextDay)?.push({ start: 0, end })
-    }
-  }
-
-  for (let day = 0; day <= 6; day++) {
-    const daySegments = segmentsByDay.get(day) || []
-    daySegments.sort((a, b) => a.start - b.start)
-    for (let i = 1; i < daySegments.length; i++) {
-      const prev = daySegments[i - 1]
-      const current = daySegments[i]
-      if (current.start < prev.end) {
-        throw new Error('Schedule intervals must not overlap')
-      }
-    }
-  }
-}
-
-export class Settings {
-  private static profileDir = joinPath(app.getPath('appData'), 'ITArmyKitProfile')
-  private static settingsFile = joinPath(Settings.profileDir, 'settings.json')
-  private static settingsBackupFile = joinPath(Settings.profileDir, 'settings.json.bak')
-  private static settingsTempFile = joinPath(Settings.profileDir, 'settings.json.tmp')
-
-  private data: SettingsData = this.createDefaultData()
-
+  private data!: SettingsData
   private loaded = false
-
   private settingsChangedEmiter = new EventEmitter()
 
   private createDefaultData (): SettingsData {
@@ -136,8 +68,19 @@ export class Settings {
         startOnBoot: false,
         language: 'en-US'
       },
-      modules: {
-        dataPath: joinPath(app.getPath('appData'), 'ITArmyKitProfile', 'modules')
+      corpus: {
+        uuid: '',
+        apiKey: ''
+      },
+      bootstrap: {
+        step: 'LANGUAGE',
+        selectedModulesConfig: 'NONE'
+      },
+      gui: {
+        theme: 'light',
+        mode: 'default',
+        unlockedModes: [],
+        lastSeenAppVersion: app.getVersion()
       },
       schedule: {
         enabled: false,
@@ -154,22 +97,8 @@ export class Settings {
           }
         ]
       },
-      itarmy: {
-        uuid: '',
-        apiKey: ''
-      },
-      bootstrap: {
-        step: 'LANGUAGE',
-        selectedModulesConfig: 'NONE'
-      },
-      gui: {
-        theme: 'light',
-        mode: 'default',
-        unlockedModes: [],
-        lastSeenAppVersion: app.getVersion()
-      },
-      activeness: {
-        score: 0
+      modules: {
+        dataPath: joinPath(Settings.profileDir, 'modules')
       },
       execution: {}
     }
@@ -235,15 +164,15 @@ export class Settings {
   }
 
   private applyLoadBackwardsCompatibility (fromExistingSettings: boolean) {
-    if (this.data.itarmy === undefined) {
-      this.data.itarmy = {
+    if (this.data.corpus === undefined) {
+      this.data.corpus = {
         uuid: '',
         apiKey: ''
       }
     }
 
-    if (this.data.itarmy.apiKey === undefined) {
-      this.data.itarmy.apiKey = ''
+    if (this.data.corpus.apiKey === undefined) {
+      this.data.corpus.apiKey = ''
     }
 
     if (this.data.system.language === undefined) {
@@ -287,18 +216,13 @@ export class Settings {
     if (typeof legacyGui.mode !== 'string') {
       legacyGui.mode = legacyGui.matrixMode ? 'matrix' : 'default'
     }
-    if (!Array.isArray(legacyGui.unlockedModes)) {
-      legacyGui.unlockedModes = legacyGui.matrixModeUnlocked ? ['matrix'] : []
-    }
-    if (fromExistingSettings && currentAppVersion === '1.6.3' && previousAppVersion !== currentAppVersion) {
-      legacyGui.mode = 'easter'
-    }
+
     legacyGui.lastSeenAppVersion = currentAppVersion
 
     this.data.gui = {
       theme: legacyGui.theme,
       mode: legacyGui.mode,
-      unlockedModes: Array.from(new Set(legacyGui.unlockedModes.filter((mode): mode is string => typeof mode === 'string'))),
+      unlockedModes: Array.from(new Set((legacyGui.unlockedModes ?? []).filter((mode): mode is string => typeof mode === 'string'))),
       lastSeenAppVersion: legacyGui.lastSeenAppVersion
     }
 
@@ -368,15 +292,7 @@ export class Settings {
         }
       })
 
-    if (this.data.activeness === undefined) {
-      this.data.activeness = {
-        score: 0
-      }
-    }
 
-    if (typeof this.data.activeness.score !== 'number' || Number.isNaN(this.data.activeness.score)) {
-      this.data.activeness.score = 0
-    }
 
     if (this.data.execution === undefined) {
       this.data.execution = {}
@@ -505,22 +421,22 @@ export class Settings {
     }
   }
 
-  async setItArmyUUID (data: SettingsData['itarmy']['uuid']) {
+  async setCorpusUUID (data: SettingsData['corpus']['uuid']) {
     if (!this.loaded) {
       await this.load()
     }
 
-    this.data.itarmy.uuid = data
+    this.data.corpus.uuid = data
     await this.save()
     this.settingsChangedEmiter.emit('settingsChanged', this.data)
   }
 
-  async setItArmyApiKey (data: SettingsData['itarmy']['apiKey']) {
+  async setCorpusApiKey (data: SettingsData['corpus']['apiKey']) {
     if (!this.loaded) {
       await this.load()
     }
 
-    this.data.itarmy.apiKey = data
+    this.data.corpus.apiKey = data
     await this.save()
     this.settingsChangedEmiter.emit('settingsChanged', this.data)
   }
@@ -575,29 +491,7 @@ export class Settings {
     this.settingsChangedEmiter.emit('settingsChanged', this.data)
   }
 
-  async setActivenessSID (data: SettingsData['activeness']['sid']) {
-    if (!this.loaded) {
-      await this.load()
-    }
 
-    if (data === undefined) {
-      delete this.data.activeness.sid
-    } else {
-      this.data.activeness.sid = data
-    }
-    await this.save()
-    this.settingsChangedEmiter.emit('settingsChanged', this.data)
-  }
-
-  async setActivenessScore (data: SettingsData['activeness']['score']) {
-    if (!this.loaded) {
-      await this.load()
-    }
-
-    this.data.activeness.score = Math.max(0, data)
-    await this.save()
-    this.settingsChangedEmiter.emit('settingsChanged', this.data)
-  }
 
   async setExecutionModuleToRun (data: SettingsData['execution']['moduleToRun']) {
     if (!this.loaded) {
@@ -661,6 +555,25 @@ export class Settings {
   }
 }
 
+function validateScheduleIntervalsNoOverlap (intervals: ScheduleInterval[]) {
+  for (let i = 0; i < intervals.length; i++) {
+    for (let j = i + 1; j < intervals.length; j++) {
+      const a = intervals[i]
+      const b = intervals[j]
+      const overlapDays = a.days.filter((day) => b.days.includes(day))
+      if (overlapDays.length > 0) {
+        const aStart = parseInt(a.startTime.split(':')[0], 10) * 60 + parseInt(a.startTime.split(':')[1], 10)
+        const aEnd = parseInt(a.endTime.split(':')[0], 10) * 60 + parseInt(a.endTime.split(':')[1], 10)
+        const bStart = parseInt(b.startTime.split(':')[0], 10) * 60 + parseInt(b.startTime.split(':')[1], 10)
+        const bEnd = parseInt(b.endTime.split(':')[0], 10) * 60 + parseInt(b.endTime.split(':')[1], 10)
+        if (aStart < bEnd && bStart < aEnd) {
+          throw new Error(`Schedule intervals overlap: ${a.startTime}-${a.endTime} and ${b.startTime}-${b.endTime} on days ${overlapDays.join(', ')}`)
+        }
+      }
+    }
+  }
+}
+
 export function handleSettings (settings: Settings, executionEngine: ExecutionEngine) {
   ipcMain.handle('settings:get', async () => {
     return await settings.getData()
@@ -707,12 +620,12 @@ export function handleSettings (settings: Settings, executionEngine: ExecutionEn
     app.exit()
   })
 
-  ipcMain.handle('settings:itarmy:uuid', async (_e, data: SettingsData['itarmy']['uuid']) => {
-    await settings.setItArmyUUID(data)
+  ipcMain.handle('settings:corpus:uuid', async (_e, data: SettingsData['corpus']['uuid']) => {
+    await settings.setCorpusUUID(data)
   })
 
-  ipcMain.handle('settings:itarmy:apiKey', async (_e, data: SettingsData['itarmy']['apiKey']) => {
-    await settings.setItArmyApiKey(data)
+  ipcMain.handle('settings:corpus:apiKey', async (_e, data: SettingsData['corpus']['apiKey']) => {
+    await settings.setCorpusApiKey(data)
   })
 
   ipcMain.handle('settings:bootstrap:step', async (_e, data: SettingsData['bootstrap']['step']) => {

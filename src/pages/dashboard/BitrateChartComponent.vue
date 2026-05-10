@@ -68,6 +68,7 @@
 
 <script lang="ts" setup>
 import { ModuleExecutionStatisticsEventData } from 'app/lib/module/module'
+import { ExecutionLogEntry } from 'app/src-electron/handlers/engine'
 import { IpcRendererEvent } from 'electron'
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import VueApexCharts from 'vue3-apexcharts'
@@ -78,12 +79,6 @@ const $q = useQuasar()
 const { t } = useI18n()
 const MAX_RETENTION_MS = 1000 * 60 * 60 * 12 // 12h local retention
 const BITRATE_SMOOTH_ALPHA = 0.55 // higher = closer to raw value
-
-interface ExecutionLogEntry {
-  type: 'STARTED' | 'STOPPED' | 'ERROR';
-  moduleName: 'DISTRESS' | 'MHDDOS_PROXY';
-  timestamp: number;
-}
 
 const eventLabelMap: Record<ExecutionLogEntry['type'], string> = {
   STARTED: 'dashboard.chart.events.started',
@@ -215,13 +210,13 @@ const seriesData = computed(() => [
 ])
 
 const chartOptions = computed(() => {
-  const textColor = $q.dark.isActive ? '#e5e7eb' : '#1f2937'
-  const mutedText = $q.dark.isActive ? '#9ca3af' : '#6b7280'
-  const gridColor = $q.dark.isActive ? 'rgba(148,163,184,0.14)' : 'rgba(148,163,184,0.35)'
+  const textColor = $q.dark.isActive ? '#e7e0c4' : '#1f2418'
+  const mutedText = $q.dark.isActive ? '#9fa083' : '#687057'
+  const gridColor = $q.dark.isActive ? 'rgba(112,130,72,0.24)' : 'rgba(72,86,45,0.22)'
   const tooltipTheme = $q.dark.isActive ? 'dark' : 'light'
-  const chartBg = $q.dark.isActive ? 'rgba(17,24,39,0.14)' : 'rgba(241,245,249,0.45)'
-  const areaOpacity = $q.dark.isActive ? 0.24 : 0.14
-  const trendOpacity = $q.dark.isActive ? 0.3 : 0.22
+  const chartBg = $q.dark.isActive ? 'rgba(17,20,15,0.42)' : 'rgba(237,234,221,0.55)'
+  const areaOpacity = $q.dark.isActive ? 0.3 : 0.18
+  const trendOpacity = $q.dark.isActive ? 0.32 : 0.24
 
   return {
     chart: {
@@ -245,7 +240,7 @@ const chartOptions = computed(() => {
       foreColor: textColor,
       background: chartBg
     },
-    colors: ['#f59e0b', '#06b6d4'],
+    colors: ['#c28f2c', '#3e7782'],
     stroke: {
       curve: 'smooth',
       width: [2.8, 2],
@@ -293,8 +288,8 @@ const chartOptions = computed(() => {
               y: peakPoint.value[1],
               marker: {
                 size: 5,
-                fillColor: '#f59e0b',
-                strokeColor: $q.dark.isActive ? '#0b1220' : '#ffffff',
+                fillColor: '#c28f2c',
+                strokeColor: $q.dark.isActive ? '#11140f' : '#ffffff',
                 strokeWidth: 2
               },
               label: {
@@ -302,7 +297,7 @@ const chartOptions = computed(() => {
                 offsetY: -8,
                 style: {
                   color: '#fff',
-                  background: '#f59e0b',
+                  background: '#c28f2c',
                   fontSize: '11px'
                 },
                 text: `${t('dashboard.chart.peak')}: ${humanBytesString(peakPoint.value[1])}/s`
@@ -491,18 +486,18 @@ onUnmounted(() => {
 }
 
 .metric-card {
-  border: 1px solid rgba(148, 163, 184, 0.25);
-  border-radius: 10px;
+  border: 1px solid var(--app-soft-border);
+  border-radius: 8px;
   padding: 5px 9px;
   min-width: 120px;
-  background: rgba(148, 163, 184, 0.06);
+  background: var(--app-soft-surface);
 }
 
 .metric-label {
   font-size: 11px;
-  letter-spacing: 0.02em;
+  letter-spacing: 0;
   text-transform: uppercase;
-  color: #94a3b8;
+  color: var(--app-muted-text);
 }
 
 .metric-value {
@@ -524,7 +519,7 @@ onUnmounted(() => {
 }
 
 .series-chip {
-  border: 1px solid rgba(148, 163, 184, 0.25);
+  border: 1px solid var(--app-soft-border);
   border-radius: 999px;
   padding: 2px 8px;
   font-size: 12px;
@@ -541,33 +536,33 @@ onUnmounted(() => {
 }
 
 .dot-bitrate {
-  background: #f59e0b;
+  background: #c28f2c;
 }
 
 .dot-trend {
-  background: #06b6d4;
+  background: #3e7782;
 }
 
 .dot-peak {
-  background: #f59e0b;
+  background: #c28f2c;
 }
 
 .peak-marker-chip {
   cursor: pointer;
-  background: rgba(148, 163, 184, 0.06);
-  color: #94a3b8;
+  background: var(--app-soft-surface);
+  color: var(--app-muted-text);
   transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
 }
 
 .peak-marker-chip:hover {
-  border-color: rgba(245, 158, 11, 0.38);
+  border-color: rgba(194, 143, 44, 0.45);
 }
 
 .peak-marker-chip.active {
-  color: #111827;
+  color: #1f2418;
   font-weight: 700;
-  border-color: rgba(245, 158, 11, 0.5);
-  background: rgba(245, 158, 11, 0.18);
+  border-color: rgba(194, 143, 44, 0.58);
+  background: rgba(194, 143, 44, 0.2);
 }
 
 :global(body.body--dark) .peak-marker-chip.active {
@@ -579,18 +574,18 @@ onUnmounted(() => {
 }
 
 :deep(.range-toggle .q-btn) {
-  border: 1px solid rgba(148, 163, 184, 0.3);
+  border: 1px solid var(--app-soft-border);
   background: transparent;
-  color: #94a3b8;
+  color: var(--app-muted-text);
   min-width: 62px;
   flex: 1 1 0;
   padding: 0 8px;
 }
 
 :deep(.range-toggle .q-btn.q-btn--active) {
-  background: rgba(59, 130, 246, 0.22);
+  background: var(--app-nav-active-bg);
   color: #fff;
-  border-color: rgba(59, 130, 246, 0.45);
+  border-color: rgba(194, 143, 44, 0.52);
 }
 
 @media (max-width: 900px) {

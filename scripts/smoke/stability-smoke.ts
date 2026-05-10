@@ -8,7 +8,7 @@ import { ChildProcessLike, ProcessSignal, terminateChildProcess } from '../../li
 import { writeStabilityLog } from '../../lib/utils/stabilityLog'
 
 async function testAtomicFileWrite () {
-  const baseDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'itarmykit-smoke-'))
+  const baseDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'cyberowl-smoke-'))
   const targetPath = path.join(baseDir, 'engine.state.json')
   const backupPath = `${targetPath}.bak`
   const tempPath = `${targetPath}.tmp`
@@ -109,7 +109,7 @@ async function testPosixKillEscalation () {
 }
 
 async function testStabilityLogWrite () {
-  const baseDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'itarmykit-log-smoke-'))
+  const baseDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'cyberowl-log-smoke-'))
   const logPath = path.join(baseDir, 'stability.log')
 
   writeStabilityLog({

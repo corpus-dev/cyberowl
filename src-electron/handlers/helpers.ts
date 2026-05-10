@@ -4,7 +4,7 @@ import { app, ipcMain, shell } from 'electron'
 import { writeStabilityLog } from 'app/lib/utils/stabilityLog'
 
 function getProfileDirectoryPath () {
-  return path.join(app.getPath('appData'), 'ITArmyKitProfile')
+  return path.join(app.getPath('appData'), 'CyberOwlProfile')
 }
 
 function getStabilityLogFilePath () {

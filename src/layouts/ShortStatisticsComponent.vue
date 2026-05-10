@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   {{ userName + " | " + selectedModule }} |
   <span
     :class="
@@ -18,12 +18,12 @@ import { ModuleExecutionStatisticsEventData } from 'app/lib/module/module'
 import { ExecutionLogEntry } from 'app/src-electron/handlers/engine'
 import { IpcRendererEvent } from 'electron/renderer'
 import { computed, onMounted, onUnmounted, ref } from 'vue'
-import { useItArmyStats } from 'src/composables/useItArmyStats'
+import { useCorpusStats } from 'src/composables/useCorpusStats'
 
 const selectedModule = ref('')
 const moduleState = ref('')
 const moduleTraffic = ref('')
-const { login, totalTraffic, hasData } = useItArmyStats()
+const { login, totalTraffic, hasData } = useCorpusStats()
 const userName = computed(() => login.value)
 const moduleTotalBytesSend = computed(() => hasData.value ? humanBytesString(totalTraffic.value) : '')
 
@@ -93,3 +93,4 @@ onUnmounted(() => {
   window.executionEngineAPI.stopListeningForStatistics(onStatisticsUpdate)
 })
 </script>
+

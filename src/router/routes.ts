@@ -12,8 +12,6 @@ const routes: RouteRecordRaw[] = [
       { path: '/modules/mhddosproxy', name: 'modules_mhddosproxy', component: () => import('pages/modules/mhddosproxyPage.vue') },
       { path: '/modules/distress', name: 'modules_distress', component: () => import('pages/modules/distressPage.vue') },
 
-      { path: '/activeness', name: 'activeness', component: () => import('pages/activeness/ActivenessPage.vue') },
-
       { path: '/settings', name: 'settings', component: () => import('pages/SettingsPage.vue') },
       { path: '/schedule', name: 'schedule', component: () => import('pages/SchedulePage.vue') },
       { path: '/top', name: 'top', component: () => import('pages/top/TopPage.vue') },
