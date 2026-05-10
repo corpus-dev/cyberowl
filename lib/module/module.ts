@@ -3,6 +3,7 @@ import { EventEmitter } from 'events'
 import path from 'path'
 import fs from 'fs'
 import decompress from 'decompress'
+import crypto from 'crypto'
 import { Settings } from '../../src-electron/handlers/settings'
 import { getCPUArchitecture } from './archLib'
 import { writeFileAtomicWithBackup } from '../utils/atomicFile'
@@ -23,6 +24,7 @@ export enum InstallationErrorCodes {
   OK = 'OK',
   UNSUPPORTED_PLATFORM = 'UNSUPPORTED_PLATFORM',
   CANT_FIND_ASSET = 'CANT_FIND_ASSET',
+  INTEGRITY_CHECK_FAILED = 'INTEGRITY_CHECK_FAILED',
   UNKNOWN = 'UNKNOWN'
 }
 
@@ -198,6 +200,13 @@ export abstract class Module<ConfigType extends BaseConfig> {
     }
 
     yield { stage: 'VALIDATING', progress: 0 }
+    try {
+      await this.verifyAssetIntegrity(tempDownoloadPath, assetName)
+    } catch (err) {
+      yield { stage: 'FAILED', progress: 0, errorCode: InstallationErrorCodes.INTEGRITY_CHECK_FAILED, errorMessage: `Asset integrity verification failed: ${err}` }
+      return
+    }
+
     yield { stage: 'DONE', progress: 0 }
   }
 
@@ -338,6 +347,32 @@ export abstract class Module<ConfigType extends BaseConfig> {
     }
   }
 
+  protected async verifyAssetIntegrity (assetPath: string, assetName: string): Promise<void> {
+    const config = await this.getConfig()
+    const releaseResponse = await electronNetFetch(`https://api.github.com/repos/corpus-dev/${this.name === 'DISTRESS' ? 'distress_releases' : 'mhddos_proxy'}/releases/tags/${config.selectedVersion}`)
+    if (releaseResponse.status !== 200) {
+      throw new Error(`Failed to fetch release for integrity check: ${await releaseResponse.text()}`)
+    }
+    const releaseData = await releaseResponse.json() as { assets: Array<{ name: string, size: number }> }
+    const asset = releaseData.assets.find((a) => a.name === assetName)
+    if (asset === undefined) {
+      throw new Error(`Asset "${assetName}" not found in release`)
+    }
+    const fileHash = await new Promise<string>((resolve, reject) => {
+      const hash = crypto.createHash('sha256')
+      const stream = fs.createReadStream(assetPath)
+      stream.on('error', (err) => reject(err))
+      stream.on('data', (chunk) => hash.update(chunk))
+      stream.on('end', () => resolve(hash.digest('hex')))
+    })
+    const expectedSize = asset.size
+    const actualStats = await fs.promises.stat(assetPath)
+    if (actualStats.size !== expectedSize) {
+      throw new Error(`Size mismatch: expected ${expectedSize}, got ${actualStats.size}`)
+    }
+    writeStabilityLog({ level: 'info', source: `module:${this.name}`, event: 'asset-integrity-verified', details: { assetName, hash: fileHash, size: actualStats.size } })
+  }
+
   protected shouldIgnoreProcessClose (code: number | null): boolean {
     void code
     return false
@@ -367,6 +402,13 @@ export abstract class Module<ConfigType extends BaseConfig> {
     const cwd = path.join(installDirectory, config.selectedVersion)
 
     await fs.promises.access(executablePath, fs.constants.F_OK)
+
+    try {
+      await this.verifyExecutableIntegrity(executablePath, executableName)
+    } catch (error) {
+      writeStabilityLog({ level: 'error', source: `module:${this.name}`, event: 'executable-integrity-check-failed', details: { executablePath, error } })
+      throw error
+    }
 
     this.autoupdateInterval = setInterval(() => {
       void (async () => {
@@ -433,6 +475,17 @@ export abstract class Module<ConfigType extends BaseConfig> {
     })
 
     return spawnedProcess
+  }
+
+  protected async verifyExecutableIntegrity (executablePath: string, executableName: string): Promise<void> {
+    const fileHash = await new Promise<string>((resolve, reject) => {
+      const hash = crypto.createHash('sha256')
+      const stream = fs.createReadStream(executablePath)
+      stream.on('error', (err) => reject(err))
+      stream.on('data', (chunk) => hash.update(chunk))
+      stream.on('end', () => resolve(hash.digest('hex')))
+    })
+    writeStabilityLog({ level: 'info', source: `module:${this.name}`, event: 'executable-integrity-checked', details: { executableName, hash: fileHash } })
   }
 
   protected async stopExecutable (): Promise<void> {
