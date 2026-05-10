@@ -10,8 +10,8 @@
   },
   "private": false,
   "license": "GPL-3.0",
-  "repository": "https://github.com/corpus-dev/corpusowl",
-  "homepage": "https://github.com/corpus-dev",
+  "repository": "https://github.com/corpus-dev/cyberowl",
+  "homepage": "https://github.com/corpus-dev/cyberowl",
   "scripts": {
     "lint": "eslint --ext .js,.ts,.vue ./",
     "lintfix": "eslint --fix --ext .js,.ts,.vue ./",

@@ -43,13 +43,13 @@ async function fetchContributors (repo: string): Promise<Contributor[]> {
 }
 
 async function getDevelopersFromGithub (): Promise<Contributor[]> {
-  const itkitContributors = await fetchContributors('corpus-dev/corpuskit')
+  const cyberOwlContributors = await fetchContributors('corpus-dev/cyberowl')
   const db1000nContributors = await fetchContributors('arriven/db1000n')
   const mhddosProxyContributors = await fetchContributors('corpus-dev/mhddos_proxy')
   const distressContributors = await fetchContributors('corpus-dev/distress_releases')
   const ADSSContributors = await fetchContributors('it-army-ua-scripts/ADSS')
 
-  const contributors = itkitContributors
+  const contributors = cyberOwlContributors
   contributors.sort((a, b) => b.contributions - a.contributions)
 
   for (const db1000nContributor of db1000nContributors) {

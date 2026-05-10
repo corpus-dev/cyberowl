@@ -72,8 +72,8 @@
         </p>
         <p>
           2. {{ $t("developers.contactP2") }}
-          <a href="https://github.com/corpus-dev/corpuskit" target="_blank"
-            >https://github.com/corpus-dev/corpuskit</a
+          <a href="https://github.com/corpus-dev/cyberowl" target="_blank"
+            >https://github.com/corpus-dev/cyberowl</a
           >, {{ $t("developers.contactP2_1") }}
         </p>
         <p>3. {{ $t("developers.contactP3") }}</p>
