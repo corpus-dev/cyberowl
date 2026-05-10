@@ -388,6 +388,17 @@ export abstract class Module<ConfigType extends BaseConfig> {
     const installDirectory = await this.getInstallationDirectory()
 
     if (config.selectedVersion === undefined) {
+      const versions = await this.getAllVersions()
+      for (const version of versions) {
+        if (version.installed) {
+          config.selectedVersion = version.tag
+          await this.setConfig(config)
+          break
+        }
+      }
+    }
+
+    if (config.selectedVersion === undefined) {
       const error = new Error('Failed to start executable. No version selected')
       writeStabilityLog({ level: 'error', source: `module:${this.name}`, event: 'process-error', details: error })
       this.emit('execution:error', { type: 'execution:error', error })

