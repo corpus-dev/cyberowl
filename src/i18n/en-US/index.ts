@@ -206,6 +206,7 @@ export default {
     deleteStatistics: 'Delete Statistics',
     deleteModulesCache: 'Delete Modules Cache',
     deleteAllTheData: 'Factory Settings',
+    dataDeleted: 'Data deleted successfully',
     diagnostics: {
       title: 'Diagnostics',
       description: 'Service tools for troubleshooting.',

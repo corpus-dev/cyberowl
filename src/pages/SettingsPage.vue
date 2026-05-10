@@ -373,13 +373,19 @@ async function deleteStatistics () {
 const deleteModulesCacheDialog = ref(false)
 async function deleteModulesCache () {
   await window.settingsAPI.modules.deleteData()
+  $q.notify({
+    color: 'negative',
+    textColor: 'white',
+    message: t('settings.dataDeleted'),
+    icon: 'warning',
+    position: 'bottom'
+  })
 }
 
 const deleteAllDataDialog = ref(false)
 async function deleteAllData () {
   await window.settingsAPI.deleteData()
   deleteAllDataDialog.value = false
-  await loadSettings()
 }
 
 const themeOptions = ref<Array<{label: string, value: string}>>([
