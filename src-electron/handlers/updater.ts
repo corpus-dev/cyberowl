@@ -3,7 +3,7 @@ import { Settings } from './settings'
 import { ExecutionEngine } from './engine'
 
 export function handleUpdater (settings: Settings, executionEngine: ExecutionEngine) {
-  autoUpdater.allowPrerelease = true
+  autoUpdater.allowPrerelease = false
 
   const updateFunction = async () => {
     try {

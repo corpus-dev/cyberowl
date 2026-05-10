@@ -580,10 +580,9 @@ export function handleSettings (settings: Settings, executionEngine: ExecutionEn
   })
 
   ipcMain.handle('settings:deleteData', async () => {
-    await executionEngine.stopModule()
+    await executionEngine.dispose()
     await settings.deleteData()
     app.relaunch()
-    app.exit()
   })
 
   ipcMain.handle('settings:system:autoUpdate', async (_e, data: SettingsData['system']['autoUpdate']) => {
