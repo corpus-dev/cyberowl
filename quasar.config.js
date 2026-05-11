@@ -242,7 +242,7 @@ module.exports = configure(function (/* ctx */) {
 
         publish: {
           provider: 'github',
-          releaseType: 'release'
+          releaseType: 'prerelease'
         }
       }
     },
