@@ -25,10 +25,6 @@ const stageProgress = ref(0)
 const stage = ref('')
 
 function configurationCallback (progress: InstallProgress) {
-  if (progress.errorMessage) {
-    throw progress.errorMessage
-  }
-
   if (progress.stage === 'DONE') {
     emit('configured')
     return

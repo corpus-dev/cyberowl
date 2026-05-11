@@ -191,19 +191,19 @@ export abstract class Module<ConfigType extends BaseConfig> {
       return
     }
 
+    yield { stage: 'VALIDATING', progress: 0 }
+    try {
+      await this.verifyAssetIntegrity(tempDownoloadPath, assetName, owner, repo, tag)
+    } catch (err) {
+      yield { stage: 'FAILED', progress: 0, errorCode: InstallationErrorCodes.INTEGRITY_CHECK_FAILED, errorMessage: `Asset integrity verification failed: ${err}` }
+      return
+    }
+
     yield { stage: 'EXTRACTING', progress: 0 }
     try {
       await this.extractArchive(tempDownoloadPath, path.join(installDirectory, tag))
     } catch (err) {
       yield { stage: 'FAILED', progress: 0, errorCode: InstallationErrorCodes.UNKNOWN, errorMessage: `Cant extract archive: ${err}` }
-      return
-    }
-
-    yield { stage: 'VALIDATING', progress: 0 }
-    try {
-      await this.verifyAssetIntegrity(tempDownoloadPath, assetName)
-    } catch (err) {
-      yield { stage: 'FAILED', progress: 0, errorCode: InstallationErrorCodes.INTEGRITY_CHECK_FAILED, errorMessage: `Asset integrity verification failed: ${err}` }
       return
     }
 
@@ -347,9 +347,8 @@ export abstract class Module<ConfigType extends BaseConfig> {
     }
   }
 
-  protected async verifyAssetIntegrity (assetPath: string, assetName: string): Promise<void> {
-    const config = await this.getConfig()
-    const releaseResponse = await electronNetFetch(`https://api.github.com/repos/corpus-dev/${this.name === 'DISTRESS' ? 'distress_releases' : 'mhddos_proxy'}/releases/tags/${config.selectedVersion}`)
+  protected async verifyAssetIntegrity (assetPath: string, assetName: string, owner: string, repo: string, tag: string): Promise<void> {
+    const releaseResponse = await electronNetFetch(`https://api.github.com/repos/${owner}/${repo}/releases/tags/${tag}`)
     if (releaseResponse.status !== 200) {
       throw new Error(`Failed to fetch release for integrity check: ${await releaseResponse.text()}`)
     }

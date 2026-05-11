@@ -38,7 +38,18 @@ function selectRandomModuleWithWeight (): ModuleName {
 async function installModule (moduleName: ModuleName, mhddosProxyConfig: MHDDOSProxyConfig, distressConfig: DistressConfig, callback: (progress: InstallProgress) => void) {
   const versions = await window.modulesAPI.getAllVersions(moduleName)
   const tag = versions[0].tag
-  await window.modulesAPI.installVersion(moduleName, tag, callback)
+  let installationError: string | undefined
+
+  await window.modulesAPI.installVersion(moduleName, tag, (progress) => {
+    callback(progress)
+    if (progress.errorMessage) {
+      installationError = progress.errorMessage
+    }
+  })
+
+  if (installationError) {
+    throw new Error(installationError)
+  }
 
   switch (moduleName) {
     case 'MHDDOS_PROXY':

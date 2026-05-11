@@ -341,14 +341,14 @@ export class ExecutionEngine {
   }
 
   public async dispose () {
-    const module = this.runningModule
+    const runningModules = this.modules.filter((module) => module.isRunning)
+    if (this.runningModule != null && !runningModules.includes(this.runningModule)) {
+      runningModules.push(this.runningModule)
+    }
     this.runningModule = null
 
-    if (module != null) {
+    for (const module of runningModules) {
       this.logEvent('info', 'module-stopping', { moduleName: module.name })
-    }
-
-    if (module != null) {
       try {
         await module.stop()
         this.logEvent('info', 'dispose-stopped-module', { moduleName: module.name })

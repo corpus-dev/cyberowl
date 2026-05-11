@@ -415,9 +415,29 @@ export class Settings extends EventEmitter {
     await shell.openPath(this.data.modules.dataPath)
   }
 
+  private async removePathWithRetries (targetPath: string) {
+    const maxAttempts = 8
+    const retryDelayMs = 500
+
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        await fsPromises.rm(targetPath, { recursive: true, force: true })
+        return
+      } catch (error) {
+        const code = (error as { code?: string }).code
+        const shouldRetry = code === 'EBUSY' || code === 'EPERM' || code === 'ENOTEMPTY'
+        if (!shouldRetry || attempt === maxAttempts) {
+          throw error
+        }
+
+        await new Promise(resolve => setTimeout(resolve, retryDelayMs))
+      }
+    }
+  }
+
   async deleteModulesData () {
     if (existsSync(this.data.modules.dataPath)) {
-      await fsPromises.rm(this.data.modules.dataPath, { recursive: true, force: true })
+      await this.removePathWithRetries(this.data.modules.dataPath)
     }
   }
 
