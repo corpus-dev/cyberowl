@@ -133,10 +133,10 @@
         <span
           >{{ $t("settings.idDescription") }}
           <a
-            href="https://github.com/corpus-dev/statistics/"
+            href="https://github.com/corpus-dev/cyberowl/statistics.md"
             target="_blank"
             rel="noopener noreferrer"
-            >https://github.com/corpus-dev</a
+            >https://github.com/corpus-dev/cyberowl/statistics.md</a
           >
         </span>
         <q-separator class="q-mt-xs q-mb-sm" />

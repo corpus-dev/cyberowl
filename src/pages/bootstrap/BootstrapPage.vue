@@ -55,7 +55,7 @@
             :header-nav="step > 3"
         >
             <div class="q-mb-md">{{ $t('bootstrap.corpus.body') }}</div>
-            <div class="q-mb-md">{{ $t('settings.idDescription') }} <a href="https://github.com/corpus-dev/statistics/" target="_blank" rel="noopener noreferrer">https://github.com/corpus-dev</a></div>
+            <div class="q-mb-md">{{ $t('settings.idDescription') }} <a href="https://github.com/corpus-dev/cyberowl/statistics.md" target="_blank" rel="noopener noreferrer">https://github.com/corpus-dev/cyberowl/statistics.md</a></div>
             <q-input :label="$t('bootstrap.corpus.uuidInputTitle')" outlined v-model="corpusUUID" @update:model-value="setCorpusUUID" :debounce="500" type="number"/>
 
             <q-stepper-navigation class="row q-col-gutter-sm">

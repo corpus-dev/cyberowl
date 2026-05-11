@@ -195,7 +195,7 @@ export default {
     hideTray: 'Hide App in Tray',
     hideTrayDescription: 'Hide the app in the tray, not close it. Also, do not show the main window during startup.',
     language: 'Language',
-    idDescription: 'How to get ID ? Look on',
+    idDescription: 'How to get ID? See ',
     data: 'Storage',
     dataDescription: 'Currently your modules are located in the folder:',
     warnDelStatistics: 'Are you sure you want to delete the statistics?',
