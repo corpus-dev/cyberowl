@@ -63,10 +63,11 @@ export default {
       autoupdatesDescription: 'Das Modul automatisch auf die neueste Version aktualisieren',
       arguments: 'Startparameter (f\u00fcr fortgeschrittene Nutzer)',
       argumentsDescription: 'Zus\u00e4tzliche Startparameter f\u00fcr die Ausf\u00fchrung der Bin\u00e4rdatei',
-      versions: {
+    versions: {
         versions: 'Liste der Versionen',
         downloadInstall: 'Herunterladen und Installieren',
-        selectUse: 'F\u00fcr Verwendung ausw\u00e4hlen'
+        selectUse: 'Für Verwendung auswählen',
+        refresh: 'Versionen aktualisieren'
       }
     },
     mhddosProxy: {

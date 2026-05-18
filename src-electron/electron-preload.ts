@@ -92,6 +92,9 @@ const modulesAPI = {
   async getAllVersions (moduleName: ModuleName): Promise<Version[]> {
     return await invoke<Version[]>('modules:getAllVersions', moduleName)
   },
+  async refreshVersions (moduleName: ModuleName): Promise<Version[]> {
+    return await invoke<Version[]>('modules:refreshVersions', moduleName)
+  },
   async installVersion (moduleName: ModuleName, versionTag: string, progressCallback: (progress: InstallProgress) => void): Promise<void> {
     const handleProgress = (_e: IpcRendererEvent, progressModuleName: ModuleName, progressVersionTag: string, progress: InstallProgress) => {
       if (progressModuleName === moduleName && progressVersionTag === versionTag) {

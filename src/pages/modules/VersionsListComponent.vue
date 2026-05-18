@@ -1,6 +1,9 @@
 <template>
     <q-spinner v-if="loadingVersions" class="full-width q-mt-md q-mb-md" size="xl" color="primary"/>
     <div v-if="versionsLoadingError != ''" class="text-h6 text-negative text-center q-mt-md q-mb-md">{{ versionsLoadingError }}</div>
+    <div class="full-width flex justify-end q-mb-sm">
+        <q-btn size="sm" icon="refresh" color="primary" round dense :loading="refreshing" @click="refreshVersions" :title="$t('modules.available.versions.refresh')" />
+    </div>
     <q-list separator>
         <q-item v-for="version of versions" :key="version.tag" active-class="bg-teal-1 text-grey-8" dense>
             <q-item-section style="max-width: 100px;">{{ version.tag }}</q-item-section>
@@ -34,6 +37,20 @@ const emit = defineEmits(['update:selectedVersion', 'update:installedVersions'])
 const loadingVersions = ref(false)
 const versions = ref([] as Version[])
 const versionsLoadingError = ref('')
+const refreshing = ref(false)
+
+async function refreshVersions () {
+  refreshing.value = true
+  try {
+    versions.value = await window.modulesAPI.refreshVersions(props.moduleName)
+    emit('update:installedVersions', versions.value.filter(v => v.installed).map(v => v.tag))
+    versionsLoadingError.value = ''
+  } catch (e) {
+    versionsLoadingError.value = String(e)
+  } finally {
+    refreshing.value = false
+  }
+}
 
 async function loadVersions () {
   loadingVersions.value = true

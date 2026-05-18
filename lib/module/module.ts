@@ -131,18 +131,44 @@ export abstract class Module<ConfigType extends BaseConfig> {
   }
 
   public async installLatestVersion (): Promise<boolean> {
+    this.clearGithubReleaseCache()
+
     const versions = await this.getAllVersions()
-    if (versions.length > 0 && !versions[0].installed) {
-      const progressGenerator = this.installVersion(versions[0].tag)
-      for await (const progress of progressGenerator) {
-        if (progress.stage === 'DONE') {
-          const config = await this.getConfig()
-          config.selectedVersion = versions[0].tag
-          await this.setConfig(config)
-          return true
-        }
+    if (versions.length === 0) return false
+
+    const latestTag = versions[0].tag
+    const config = await this.getConfig()
+    const selectedVersion = config.selectedVersion
+
+    if (selectedVersion === latestTag) return false
+
+    if (versions[0].installed) {
+      writeStabilityLog({
+        level: 'info',
+        source: `module:${this.name}`,
+        event: 'auto-updated-to-version',
+        details: { from: selectedVersion, to: latestTag }
+      })
+      config.selectedVersion = latestTag
+      await this.setConfig(config)
+      return true
+    }
+
+    const progressGenerator = this.installVersion(latestTag)
+    for await (const progress of progressGenerator) {
+      if (progress.stage === 'DONE') {
+        writeStabilityLog({
+          level: 'info',
+          source: `module:${this.name}`,
+          event: 'auto-updated-to-version',
+          details: { from: selectedVersion, to: latestTag }
+        })
+        config.selectedVersion = latestTag
+        await this.setConfig(config)
+        return true
       }
     }
+
     return false
   }
 
@@ -347,6 +373,11 @@ export abstract class Module<ConfigType extends BaseConfig> {
     }
   }
 
+  protected clearGithubReleaseCache () {
+    this.githubReleaseCache = []
+    this.githubReleaseCacheTime = undefined
+  }
+
   protected async verifyAssetIntegrity (assetPath: string, assetName: string, owner: string, repo: string, tag: string): Promise<void> {
     const releaseResponse = await electronNetFetch(`https://api.github.com/repos/${owner}/${repo}/releases/tags/${tag}`)
     if (releaseResponse.status !== 200) {
@@ -380,6 +411,7 @@ export abstract class Module<ConfigType extends BaseConfig> {
   protected async startExecutable (executableName: string, args: string[]): Promise<ChildProcessWithoutNullStreams> {
     let config = await this.getConfig()
     if (config.autoUpdate) {
+      this.clearGithubReleaseCache()
       await this.installLatestVersion()
       config = await this.getConfig()
     }
@@ -425,8 +457,11 @@ export abstract class Module<ConfigType extends BaseConfig> {
         try {
           const updateConfig = await this.getConfig()
           if (updateConfig.autoUpdate && await this.installLatestVersion() && this.isRunning) {
-            await this.stop()
-            await this.start()
+            const newConfig = await this.getConfig()
+            if (newConfig.selectedVersion !== updateConfig.selectedVersion) {
+              await this.stop()
+              await this.start()
+            }
           }
         } catch (error) {
           console.warn(`[Module:${this.name}] Auto-update cycle failed`, error)

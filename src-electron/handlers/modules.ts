@@ -58,4 +58,14 @@ export function handleModules (modules: Array<Distress | MHDDOSProxy>) {
 
     await (module as Module<typeof config>).setConfig(config)
   })
+
+  ipcMain.handle('modules:refreshVersions', async (_e, moduleName: ModuleName) => {
+    const module = modules.find((candidate) => candidate.name === moduleName)
+    if (!module) {
+      throw new Error(`Module ${moduleName} not found`)
+    }
+
+    ;(module as any).clearGithubReleaseCache()
+    return await module.getAllVersions()
+  })
 }

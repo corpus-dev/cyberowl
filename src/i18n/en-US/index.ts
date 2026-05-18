@@ -66,7 +66,8 @@ export default {
       versions: {
         versions: 'List of Versions',
         downloadInstall: 'Download and Install',
-        selectUse: 'Select for Use'
+        selectUse: 'Select for Use',
+        refresh: 'Refresh Versions'
       }
     },
     mhddosProxy: {
