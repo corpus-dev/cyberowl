@@ -1,6 +1,6 @@
 import { electronNetFetch } from '../utils/electronNet'
 
-const BASE_URL = 'https://bl4ck.dev/api'
+const BASE_URL = 'https://corpsstats.bl4ck.dev/api'
 
 export interface UserStats {
     login: string

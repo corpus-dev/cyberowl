@@ -103,8 +103,7 @@ const pages = [
     page: 'schedule',
     icon: 'schedule'
   },
-  // TODO: Рейтинги — тимчасово прибрано до відновлення серверу статистики
-  // { name: 'top', title: 'layout.top', page: 'top', icon: 'leaderboard' },
+  { name: 'top', title: 'layout.top', page: 'top', icon: 'leaderboard' },
   {
     name: 'developers',
     title: 'layout.developers',

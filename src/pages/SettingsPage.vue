@@ -126,8 +126,6 @@
 
       <!-- END TODO -->
 
-      <!-- TODO: ID та API Key — тимчасово прибрано до відновлення серверу статистики -->
-      <!--
       <q-card-section>
         <div class="text-h6">{{ $t("layout.appName") }}</div>
         <span
@@ -158,7 +156,6 @@
           type="password"
         />
       </q-card-section>
-      -->
 
       <q-card-section>
         <div class="text-h6">{{ $t("settings.look") }}</div>
