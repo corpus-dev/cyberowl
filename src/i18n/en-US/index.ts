@@ -95,6 +95,7 @@ export default {
   },
   top: {
     volunteers: 'TOP VOLUNTEERS',
+    day: 'Per Day',
     week: 'Per Week',
     month: 'Per Month',
     achievements: {

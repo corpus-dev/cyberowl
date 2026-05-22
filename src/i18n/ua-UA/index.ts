@@ -95,6 +95,7 @@ export default {
   },
   top: {
     volunteers: 'TO\u041f \u0412\u041e\u041b\u041e\u041d\u0422\u0415\u0420\u0406\u0412',
+    day: '\u0417\u0430 \u0434\u0435\u043d\u044c',
     week: '\u0417\u0430 \u0442\u0438\u0436\u0434\u0435\u043d\u044c',
     month: '\u0417\u0430 \u043c\u0456\u0441\u044f\u0446\u044c',
     achievements: {

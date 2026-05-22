@@ -1,56 +1,61 @@
 import { ipcMain } from 'electron'
 import { electronNetFetch } from '../../lib/utils/electronNet'
 
-export interface PeriodTopData {
-    items: Array<{
-        traffic: number,
-        user_name: string,
-        systems: Array<string>,
-        servers_count: number,
-    }>
-    start_date: string
-    end_data: string
+export interface TopItem {
+    rank: number
+    login: string
+    traffic: string
+    byTool: Record<string, string>
+    byOS: Record<string, string>
+    bySource: Record<string, string>
 }
 
-export interface TopData {
-    success: boolean;
+export interface PeriodData {
+    date?: string
+    week?: string
+    month?: string
+    items: TopItem[]
+}
+
+export interface TopApiResponse {
+    success: boolean
     error: string
     data: {
-        week_stats: PeriodTopData
-        month_stats: PeriodTopData
+        periods: {
+            day: PeriodData
+            week: PeriodData
+            month: PeriodData
+        }
     }
 }
 
-function emptyPeriodTopData (): PeriodTopData {
-  return {
-    items: [],
-    start_date: '',
-    end_data: ''
-  }
+export interface TopData {
+    day: TopItem[]
+    week: TopItem[]
+    month: TopItem[]
 }
 
 async function getTopData (): Promise<TopData> {
   try {
-    const response = await electronNetFetch('https://github.com/corpus-dev/leaderboard/json/leaderboard.json')
+    const response = await electronNetFetch('https://corpsstats.bl4ck.dev/api/tools/global-topusers')
     if (response.status !== 200) {
       return {
-        success: false,
-        error: `Bad status code: ${response.status}`,
-        data: {
-          week_stats: emptyPeriodTopData(),
-          month_stats: emptyPeriodTopData()
-        }
+        day: [],
+        week: [],
+        month: []
       }
     }
-    return await response.json() as TopData
-  } catch (err) {
+    const json = await response.json() as TopApiResponse
     return {
-      success: false,
-      error: String(err),
-      data: {
-        week_stats: emptyPeriodTopData(),
-        month_stats: emptyPeriodTopData()
-      }
+      day: json.data.periods.day.items || [],
+      week: json.data.periods.week.items || [],
+      month: json.data.periods.month.items || []
+    }
+  } catch {
+    return {
+      day: [],
+      week: [],
+      month: []
     }
   }
 }

@@ -4,73 +4,94 @@
       {{ $t("top.volunteers") }}
     </div>
     <q-tabs v-model="activeTab" dense class="top-tabs">
-      <q-tab name="weekly" :label="$t('top.week')" />
-      <q-tab name="monthly" :label="$t('top.month')" />
+      <q-tab name="day" :label="$t('top.day')" />
+      <q-tab name="week" :label="$t('top.week')" />
+      <q-tab name="month" :label="$t('top.month')" />
     </q-tabs>
 
     <q-separator class="q-mb-sm" />
 
     <q-tab-panels v-model="activeTab" animated class="bg-transparent">
-      <q-tab-panel name="weekly" class="bg-transparent">
+      <q-tab-panel name="day" class="bg-transparent">
         <div class="top-list">
           <q-card
-            v-for="(row, idx) in topWeek"
-            :key="row.name + row.traffic"
+            v-for="row in topDay"
+            :key="row.login + row.traffic"
             flat
             bordered
             class="top-list-item"
-            :class="idx < 3 ? 'top-list-item--leader' : ''"
+            :class="[row.rank === 1 ? 'top-list-item--rank1' : row.rank <= 3 ? 'top-list-item--rank2' : '']"
           >
-            <div v-if="idx < 3" class="top-list-rank">#{{ idx + 1 }}</div>
+            <div class="top-list-rank">#{{ row.rank }}</div>
+
+            <div class="top-list-label">Name</div>
+            <div class="top-list-value">{{ row.login }}</div>
 
             <div class="top-list-label">Traffic</div>
             <div class="top-list-value">{{ humanBytesString(row.traffic) }}</div>
 
-            <div class="top-list-label">Name</div>
-            <div class="top-list-value">{{ row.name }}</div>
-
-            <div class="top-list-label">Servers</div>
-            <div class="top-list-value">{{ row.servers }}</div>
+            <div class="top-list-label">Tools</div>
+            <div class="top-list-value">{{ formatTools(row.byTool) }}</div>
           </q-card>
         </div>
       </q-tab-panel>
-      <q-tab-panel name="monthly" class="bg-transparent">
+      <q-tab-panel name="week" class="bg-transparent">
         <div class="top-list">
           <q-card
-            v-for="(row, idx) in topMonth"
-            :key="row.name + row.traffic"
+            v-for="row in topWeek"
+            :key="row.login + row.traffic"
             flat
             bordered
             class="top-list-item"
-            :class="idx < 3 ? 'top-list-item--leader' : ''"
+            :class="[row.rank === 1 ? 'top-list-item--rank1' : row.rank <= 3 ? 'top-list-item--rank2' : '']"
           >
-            <div v-if="idx < 3" class="top-list-rank">#{{ idx + 1 }}</div>
+            <div class="top-list-rank">#{{ row.rank }}</div>
+
+            <div class="top-list-label">Name</div>
+            <div class="top-list-value">{{ row.login }}</div>
 
             <div class="top-list-label">Traffic</div>
             <div class="top-list-value">{{ humanBytesString(row.traffic) }}</div>
 
-            <div class="top-list-label">Name</div>
-            <div class="top-list-value">{{ row.name }}</div>
-
-            <div class="top-list-label">Servers</div>
-            <div class="top-list-value">{{ row.servers }}</div>
+            <div class="top-list-label">Tools</div>
+            <div class="top-list-value">{{ formatTools(row.byTool) }}</div>
           </q-card>
         </div>
       </q-tab-panel>
+      <q-tab-panel name="month" class="bg-transparent">
+        <div class="top-list">
+          <q-card
+            v-for="row in topMonth"
+            :key="row.login + row.traffic"
+            flat
+            bordered
+            class="top-list-item"
+            :class="[row.rank === 1 ? 'top-list-item--rank1' : row.rank <= 3 ? 'top-list-item--rank2' : '']"
+          >
+            <div class="top-list-rank">#{{ row.rank }}</div>
 
+            <div class="top-list-label">Name</div>
+            <div class="top-list-value">{{ row.login }}</div>
+
+            <div class="top-list-label">Traffic</div>
+            <div class="top-list-value">{{ humanBytesString(row.traffic) }}</div>
+
+            <div class="top-list-label">Tools</div>
+            <div class="top-list-value">{{ formatTools(row.byTool) }}</div>
+          </q-card>
+        </div>
+      </q-tab-panel>
     </q-tab-panels>
   </q-page>
 </template>
 
 <script setup lang="ts">
-import { useQuasar } from 'quasar'
 import { ref, onMounted } from 'vue'
-const $q = useQuasar()
 
-const activeTab = ref('weekly')
+const activeTab = ref('day')
 
 function humanBytesString (bytes: number, dp = 1) {
-  const thresh = 1024 // 1024 instead of 1000 to be consistent with other places
+  const thresh = 1024
 
   if (Math.abs(bytes) < thresh) {
     return bytes + ' B'
@@ -91,40 +112,51 @@ function humanBytesString (bytes: number, dp = 1) {
   return bytes.toFixed(dp) + ' ' + units[u]
 }
 
-const topWeek = ref(
-  [] as Array<{
-    traffic: number;
-    name: string;
-    servers: number;
-  }>
-)
+function formatTools (byTool: Record<string, string>): string {
+  return Object.entries(byTool)
+    .map(([tool, bytes]) => `${tool} (${humanBytesString(Number(bytes))})`)
+    .join(', ')
+}
 
-const topMonth = ref(
-  [] as Array<{
-    traffic: number;
-    name: string;
-    servers: number;
-  }>
-)
+interface TopItem {
+  rank: number
+  login: string
+  traffic: number
+  byTool: Record<string, string>
+  byOS: Record<string, string>
+  bySource: Record<string, string>
+}
+
+const topDay = ref<TopItem[]>([])
+const topWeek = ref<TopItem[]>([])
+const topMonth = ref<TopItem[]>([])
 
 async function loadTop () {
-  const weeklyTop = await window.topAPI.getWeeklyTop()
-  topWeek.value = []
-  for (const entry of weeklyTop.data.week_stats.items) {
-    topWeek.value.push({
-      traffic: entry.traffic,
-      name: entry.user_name,
-      servers: entry.servers_count
-    })
-  }
-  topMonth.value = []
-  for (const entry of weeklyTop.data.month_stats.items) {
-    topMonth.value.push({
-      traffic: entry.traffic,
-      name: entry.user_name,
-      servers: entry.servers_count
-    })
-  }
+  const data = await window.topAPI.getWeeklyTop()
+  topDay.value = (data.day || []).map((item) => ({
+    rank: item.rank,
+    login: item.login,
+    traffic: Number(item.traffic),
+    byTool: item.byTool || {},
+    byOS: item.byOS || {},
+    bySource: item.bySource || {}
+  }))
+  topWeek.value = (data.week || []).map((item) => ({
+    rank: item.rank,
+    login: item.login,
+    traffic: Number(item.traffic),
+    byTool: item.byTool || {},
+    byOS: item.byOS || {},
+    bySource: item.bySource || {}
+  }))
+  topMonth.value = (data.month || []).map((item) => ({
+    rank: item.rank,
+    login: item.login,
+    traffic: Number(item.traffic),
+    byTool: item.byTool || {},
+    byOS: item.byOS || {},
+    bySource: item.bySource || {}
+  }))
 }
 
 onMounted(async () => {
@@ -147,6 +179,17 @@ onMounted(async () => {
   border: 1px solid var(--app-soft-border);
   text-align: center;
   position: relative;
+  transition: all 0.3s ease;
+}
+
+.top-list-item--rank1 {
+  border-color: var(--app-accent-warm);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--app-accent-warm) 25%, transparent);
+}
+
+.top-list-item--rank2 {
+  border-color: color-mix(in srgb, var(--app-accent-warm) 35%, transparent);
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--app-accent-warm) 12%, transparent);
 }
 
 .top-title {
@@ -179,11 +222,6 @@ onMounted(async () => {
   margin-bottom: 8px;
   word-break: break-word;
   color: var(--app-shell-text);
-}
-
-.top-list-item--leader {
-  border-color: var(--app-accent-warm);
-  box-shadow: 0 8px 20px color-mix(in srgb, var(--app-accent-warm) 22%, transparent);
 }
 
 .top-list-rank {
