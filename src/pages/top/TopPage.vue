@@ -27,7 +27,7 @@
             <div class="top-podium-name">{{ row.login }}</div>
 
            <div class="top-podium-label">Traffic</div>
-            <div class="top-podium-traffic">{{ humanBytesString(sumTraffic(row)) }}</div>
+            <div class="top-podium-traffic">{{ humanBytesString(row.traffic) }}</div>
 
             <div class="top-podium-label">Tools</div>
             <div class="top-podium-tools">
@@ -55,7 +55,7 @@
             <div class="top-rest-name">{{ row.login }}</div>
 
             <div class="top-rest-label">Traffic</div>
-            <div class="top-rest-traffic">{{ humanBytesString(sumTraffic(row)) }}</div>
+            <div class="top-rest-traffic">{{ humanBytesString(row.traffic) }}</div>
 
             <div class="top-rest-label">Tools</div>
             <div class="top-rest-tools">
@@ -85,7 +85,7 @@
             <div class="top-podium-name">{{ row.login }}</div>
 
             <div class="top-podium-label">Traffic</div>
-            <div class="top-podium-traffic">{{ humanBytesString(sumTraffic(row)) }}</div>
+            <div class="top-podium-traffic">{{ humanBytesString(row.traffic) }}</div>
 
             <div class="top-podium-label">Tools</div>
             <div class="top-podium-tools">
@@ -113,7 +113,7 @@
             <div class="top-rest-name">{{ row.login }}</div>
 
             <div class="top-rest-label">Traffic</div>
-            <div class="top-rest-traffic">{{ humanBytesString(sumTraffic(row)) }}</div>
+            <div class="top-rest-traffic">{{ humanBytesString(row.traffic) }}</div>
 
             <div class="top-rest-label">Tools</div>
             <div class="top-rest-tools">
@@ -143,7 +143,7 @@
             <div class="top-podium-name">{{ row.login }}</div>
 
             <div class="top-podium-label">Traffic</div>
-            <div class="top-podium-traffic">{{ humanBytesString(sumTraffic(row)) }}</div>
+            <div class="top-podium-traffic">{{ humanBytesString(row.traffic) }}</div>
 
             <div class="top-podium-label">Tools</div>
             <div class="top-podium-tools">
@@ -171,7 +171,7 @@
             <div class="top-rest-name">{{ row.login }}</div>
 
             <div class="top-rest-label">Traffic</div>
-            <div class="top-rest-traffic">{{ humanBytesString(sumTraffic(row)) }}</div>
+            <div class="top-rest-traffic">{{ humanBytesString(row.traffic) }}</div>
 
             <div class="top-rest-label">Tools</div>
             <div class="top-rest-tools">
@@ -223,10 +223,6 @@ interface TopItem {
   byTool: Record<string, string>
   byOS: Record<string, string>
   bySource: Record<string, string>
-}
-
-function sumTraffic (item: TopItem): number {
-  return Object.values(item.byTool).reduce((sum, bytes) => sum + Number(bytes), 0)
 }
 
 const topDay = ref<TopItem[]>([])
