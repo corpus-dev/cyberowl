@@ -1,4 +1,4 @@
-﻿// This is just an example,
+// This is just an example,
 // so you can safely delete all default props below
 
 export default {
@@ -9,6 +9,7 @@ export default {
     schedule: 'Zeitplan',
     top: 'Bestenliste',
     developers: 'Entwickler',
+    personal_stats: 'Benutzerstatistik',
     appName: 'Cyber Owl'
   },
   schedule: {
@@ -63,7 +64,7 @@ export default {
       autoupdatesDescription: 'Das Modul automatisch auf die neueste Version aktualisieren',
       arguments: 'Startparameter (f\u00fcr fortgeschrittene Nutzer)',
       argumentsDescription: 'Zus\u00e4tzliche Startparameter f\u00fcr die Ausf\u00fchrung der Bin\u00e4rdatei',
-    versions: {
+      versions: {
         versions: 'Liste der Versionen',
         downloadInstall: 'Herunterladen und Installieren',
         selectUse: 'Für Verwendung auswählen',
@@ -95,8 +96,20 @@ export default {
   },
   top: {
     volunteers: 'TOP FREIWILLIGE',
+    subtitle: 'Live-Leaderboard aus der Corpus statistics API',
+    day: 'Pro Tag',
     week: 'Pro Woche',
     month: 'Pro Monat',
+    total: 'Gesamt',
+    refresh: 'Aktualisieren',
+    currentPeriod: 'Zeitraum',
+    totalTraffic: 'Top-5-Datenverkehr',
+    visibleUsers: 'Benutzer',
+    machines: 'Maschinen',
+    tools: 'Tools',
+    sources: 'Quellen',
+    attackers: 'Angreifer',
+    os: 'Betriebssystem',
     achievements: {
       peopleAreLikeShips: {
         title: 'Menschen sind wie Schiffe',
@@ -108,7 +121,7 @@ export default {
         goodButton: 'Ich bin albern. Bitte befreien Sie mich',
         badButton: 'Ich mag die Ukraine nicht'
       }
-    },
+    }
 
   },
   bootstrap: {
@@ -210,7 +223,7 @@ export default {
       description: 'Dienstwerkzeuge zur Fehlersuche.',
       openProfileFolder: 'Profilordner',
       openStabilityLog: 'Stability-Log'
-    },
+    }
 
   },
 
@@ -268,7 +281,42 @@ export default {
     contactP3: 'Fragen \u00fcber Module - richten Sie sie an die Modul-Entwickler.',
     contributors: 'Mitwirkende',
     contributorsSubtitle: 'Helfen Sie dabei, das Programm zu verbessern, und Ihr Name wird automatisch in dieser Liste erscheinen. Die Liste zeigt auch Mitwirkende zur vorherigen Version der Anwendung und einigen Modulen.'
-
+  },
+  personalStats: {
+    title: 'Benutzerstatistik',
+    updatedFromApi: 'Datenverkehr, Tools, Quellen, Angreifer, Betriebssysteme und Maschinen aus der Corpus statistics API',
+    apiKeyLabel: 'API-Key',
+    loadBtn: ' Laden',
+    refresh: 'Aktualisieren',
+    overall: 'Gesamtinformation',
+    login: 'Login',
+    totalTraffic: 'Gesamtdatenverkehr',
+    allTime: 'Gesamt',
+    machine: 'Maschinen',
+    machineShort: 'Maschinen',
+    uniqueMachines: 'Eindeutige client_id Werte',
+    createdDate: 'Registrierungsdatum',
+    byTool: 'Nach Modul',
+    bySource: 'Nach Quelle',
+    byAttacker: 'Nach Angreifer',
+    byOS: 'Nach Betriebssystem',
+    periods: 'Zeiträume',
+    day: 'Pro Tag',
+    week: 'Pro Woche',
+    month: 'Pro Monat',
+    noData: 'Keine Daten für den ausgewählten Zeitraum',
+    traffic: 'Datenverkehr',
+    dayPeriod: 'Datum',
+    weekPeriod: 'Woche',
+    monthPeriod: 'Monat'
+  },
+  sidebarStats: {
+    totalTraffic: 'Datenverkehr',
+    byTool: 'Nach Modul',
+    noStats: 'Keine Daten',
+    period: 'Zeitraum',
+    day: 'Tag',
+    week: 'Woche',
+    month: 'Monat'
   }
 }
-

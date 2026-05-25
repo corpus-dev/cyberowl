@@ -124,6 +124,14 @@ module.exports = configure(function (/* ctx */) {
     // https://v2.quasar.dev/options/animations
     animations: [],
 
+    // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#extendViteConf
+    extendViteConf (viteConf) {
+      viteConf.resolve.alias = {
+        ...viteConf.resolve.alias,
+        lib: path.resolve(__dirname, 'lib')
+      }
+    },
+
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#sourcefiles
     sourceFiles: {
       rootComponent: 'src/App.vue',

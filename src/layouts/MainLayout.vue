@@ -103,6 +103,7 @@ const pages = [
     page: 'schedule',
     icon: 'schedule'
   },
+  { name: 'personal_stats', title: 'layout.personal_stats', page: 'personal_stats', icon: 'person' },
   { name: 'top', title: 'layout.top', page: 'top', icon: 'leaderboard' },
   {
     name: 'developers',

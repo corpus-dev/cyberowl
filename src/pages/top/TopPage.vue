@@ -1,204 +1,240 @@
 <template>
-  <q-page padding>
-    <div class="text-h4 text-center text-bold q-mb-md top-title">
-      {{ $t("top.volunteers") }}
+  <q-page padding class="top-page">
+    <div class="top-header q-mb-md">
+      <div>
+        <div class="text-h4 text-bold top-title">{{ $t('top.volunteers') }}</div>
+        <div class="text-caption top-muted">{{ $t('top.subtitle') }}</div>
+      </div>
+
+      <q-btn round flat color="primary" icon="refresh" :loading="loading" @click="loadTop">
+        <q-tooltip>{{ $t('top.refresh') }}</q-tooltip>
+      </q-btn>
     </div>
-    <q-tabs v-model="activeTab" dense class="top-tabs">
-      <q-tab name="day" :label="$t('top.day')" />
-      <q-tab name="week" :label="$t('top.week')" />
-      <q-tab name="month" :label="$t('top.month')" />
+
+    <q-tabs v-model="activeTab" dense class="top-tabs q-mb-md" align="left">
+      <q-tab name="day" icon="today" :label="$t('top.day')" />
+      <q-tab name="week" icon="calendar_view_week" :label="$t('top.week')" />
+      <q-tab name="month" icon="calendar_month" :label="$t('top.month')" />
+      <q-tab name="total" icon="leaderboard" :label="$t('top.total')" />
     </q-tabs>
 
-    <q-separator class="q-mb-sm" />
+    <div v-if="loading" class="row justify-center q-my-xl">
+      <q-spinner color="primary" size="3em" />
+    </div>
 
-    <q-tab-panels v-model="activeTab" animated class="bg-transparent">
-      <q-tab-panel name="day" class="bg-transparent">
-        <div class="top-podium">
-          <q-card
-            v-for="row in topThree"
-            :key="row.login + row.traffic"
-            flat
-            bordered
-            class="top-podium-item"
-            :class="'top-podium-item--rank' + row.rank"
-          >
-            <div class="top-podium-rank">#{{ row.rank }}</div>
+    <div v-else>
+      <section class="leader-summary q-mb-md">
+        <q-card flat bordered class="leader-summary-card">
+          <q-card-section>
+            <div class="summary-kicker">{{ $t('top.currentPeriod') }}</div>
+            <div class="summary-main">{{ currentPeriodLabel }}</div>
+          </q-card-section>
+        </q-card>
+        <q-card flat bordered class="leader-summary-card">
+          <q-card-section>
+            <div class="summary-kicker">{{ $t('top.totalTraffic') }}</div>
+            <div class="summary-main">{{ humanBytesString(currentTotalTraffic) }}</div>
+          </q-card-section>
+        </q-card>
+        <q-card flat bordered class="leader-summary-card">
+          <q-card-section>
+            <div class="summary-kicker">{{ $t('top.visibleUsers') }}</div>
+            <div class="summary-main">{{ currentData.length }}</div>
+          </q-card-section>
+        </q-card>
+      </section>
 
-            <div class="top-podium-name">{{ row.login }}</div>
-
-           <div class="top-podium-label">Traffic</div>
-            <div class="top-podium-traffic">{{ humanBytesString(row.traffic) }}</div>
-
-            <div class="top-podium-label">Tools</div>
-            <div class="top-podium-tools">
-              <div v-for="(bytes, tool) in row.byTool" :key="tool">{{ tool }}: {{ humanBytesString(Number(bytes)) }}</div>
+      <section v-if="topThree.length > 0" class="top-podium q-mb-lg">
+        <q-card
+          v-for="row in topThree"
+          :key="row.rank + row.login + row.traffic"
+          flat
+          bordered
+          class="top-card top-podium-item"
+          :class="'top-podium-item--rank' + row.rank"
+        >
+          <q-card-section>
+            <div class="rank-pill">#{{ row.rank }}</div>
+            <div class="leader-name">{{ row.login }}</div>
+            <div class="leader-traffic">{{ humanBytesString(Number(row.traffic)) }}</div>
+            <div class="leader-machines">
+              <q-icon name="dns" size="16px" />
+              <span>{{ formatNumber(row.machine) }} {{ $t('top.machines') }}</span>
             </div>
 
-            <div class="top-podium-label">Source</div>
-            <div class="top-podium-source">
-              <div v-for="(bytes, source) in row.bySource" :key="source">{{ source }}: {{ humanBytesString(Number(bytes)) }}</div>
+            <div class="leader-block q-mt-md">
+              <stat-chip-list :label="$t('top.tools')" :rows="toolRows(row)" />
+              <stat-chip-list :label="$t('top.sources')" :rows="sourceRows(row)" />
+              <stat-chip-list :label="$t('top.attackers')" :rows="attackerRows(row)" />
+              <stat-chip-list :label="$t('top.os')" :rows="osRows(row)" />
             </div>
-          </q-card>
-        </div>
+          </q-card-section>
+        </q-card>
+      </section>
 
-        <div v-if="restItems.length > 0" class="top-rest-list">
-          <q-card
-            v-for="row in restItems"
-            :key="row.login + row.traffic"
-            flat
-            bordered
-            class="top-rest-item"
-          >
-            <div class="top-rest-rank">#{{ row.rank }}</div>
-
-            <div class="top-rest-label">Name</div>
-            <div class="top-rest-name">{{ row.login }}</div>
-
-            <div class="top-rest-label">Traffic</div>
-            <div class="top-rest-traffic">{{ humanBytesString(row.traffic) }}</div>
-
-            <div class="top-rest-label">Tools</div>
-            <div class="top-rest-tools">
-              <div v-for="(bytes, tool) in row.byTool" :key="tool">{{ tool }}: {{ humanBytesString(Number(bytes)) }}</div>
+      <section v-if="restItems.length > 0" class="top-rest-list">
+        <q-card
+          v-for="row in restItems"
+          :key="row.rank + row.login + row.traffic"
+          flat
+          bordered
+          class="top-card top-rest-item"
+        >
+          <q-card-section>
+            <div class="rest-head">
+              <span class="rank-pill">#{{ row.rank }}</span>
+              <strong>{{ row.login }}</strong>
             </div>
-
-            <div class="top-rest-label">Source</div>
-            <div class="top-rest-source">
-              <div v-for="(bytes, source) in row.bySource" :key="source">{{ source }}: {{ humanBytesString(Number(bytes)) }}</div>
+            <div class="rest-metrics">
+              <span>{{ humanBytesString(Number(row.traffic)) }}</span>
+              <span>{{ formatNumber(row.machine) }} {{ $t('top.machines') }}</span>
             </div>
-          </q-card>
-        </div>
-      </q-tab-panel>
-
-      <q-tab-panel name="week" class="bg-transparent">
-        <div class="top-podium">
-          <q-card
-            v-for="row in topThree"
-            :key="row.login + row.traffic"
-            flat
-            bordered
-            class="top-podium-item"
-            :class="'top-podium-item--rank' + row.rank"
-          >
-            <div class="top-podium-rank">#{{ row.rank }}</div>
-
-            <div class="top-podium-name">{{ row.login }}</div>
-
-            <div class="top-podium-label">Traffic</div>
-            <div class="top-podium-traffic">{{ humanBytesString(row.traffic) }}</div>
-
-            <div class="top-podium-label">Tools</div>
-            <div class="top-podium-tools">
-              <div v-for="(bytes, tool) in row.byTool" :key="tool">{{ tool }}: {{ humanBytesString(Number(bytes)) }}</div>
+            <div class="rest-details q-mt-sm">
+              <stat-chip-list :label="$t('top.tools')" :rows="toolRows(row)" compact />
+              <stat-chip-list :label="$t('top.sources')" :rows="sourceRows(row)" compact />
+              <stat-chip-list :label="$t('top.attackers')" :rows="attackerRows(row)" compact />
+              <stat-chip-list :label="$t('top.os')" :rows="osRows(row)" compact />
             </div>
+          </q-card-section>
+        </q-card>
+      </section>
 
-            <div class="top-podium-label">Source</div>
-            <div class="top-podium-source">
-              <div v-for="(bytes, source) in row.bySource" :key="source">{{ source }}: {{ humanBytesString(Number(bytes)) }}</div>
-            </div>
-          </q-card>
-        </div>
-
-        <div v-if="restItems.length > 0" class="top-rest-list">
-          <q-card
-            v-for="row in restItems"
-            :key="row.login + row.traffic"
-            flat
-            bordered
-            class="top-rest-item"
-          >
-            <div class="top-rest-rank">#{{ row.rank }}</div>
-
-            <div class="top-rest-label">Name</div>
-            <div class="top-rest-name">{{ row.login }}</div>
-
-            <div class="top-rest-label">Traffic</div>
-            <div class="top-rest-traffic">{{ humanBytesString(row.traffic) }}</div>
-
-            <div class="top-rest-label">Tools</div>
-            <div class="top-rest-tools">
-              <div v-for="(bytes, tool) in row.byTool" :key="tool">{{ tool }}: {{ humanBytesString(Number(bytes)) }}</div>
-            </div>
-
-            <div class="top-rest-label">Source</div>
-            <div class="top-rest-source">
-              <div v-for="(bytes, source) in row.bySource" :key="source">{{ source }}: {{ humanBytesString(Number(bytes)) }}</div>
-            </div>
-          </q-card>
-        </div>
-      </q-tab-panel>
-
-      <q-tab-panel name="month" class="bg-transparent">
-        <div class="top-podium">
-          <q-card
-            v-for="row in topThree"
-            :key="row.login + row.traffic"
-            flat
-            bordered
-            class="top-podium-item"
-            :class="'top-podium-item--rank' + row.rank"
-          >
-            <div class="top-podium-rank">#{{ row.rank }}</div>
-
-            <div class="top-podium-name">{{ row.login }}</div>
-
-            <div class="top-podium-label">Traffic</div>
-            <div class="top-podium-traffic">{{ humanBytesString(row.traffic) }}</div>
-
-            <div class="top-podium-label">Tools</div>
-            <div class="top-podium-tools">
-              <div v-for="(bytes, tool) in row.byTool" :key="tool">{{ tool }}: {{ humanBytesString(Number(bytes)) }}</div>
-            </div>
-
-            <div class="top-podium-label">Source</div>
-            <div class="top-podium-source">
-              <div v-for="(bytes, source) in row.bySource" :key="source">{{ source }}: {{ humanBytesString(Number(bytes)) }}</div>
-            </div>
-          </q-card>
-        </div>
-
-        <div v-if="restItems.length > 0" class="top-rest-list">
-          <q-card
-            v-for="row in restItems"
-            :key="row.login + row.traffic"
-            flat
-            bordered
-            class="top-rest-item"
-          >
-            <div class="top-rest-rank">#{{ row.rank }}</div>
-
-            <div class="top-rest-label">Name</div>
-            <div class="top-rest-name">{{ row.login }}</div>
-
-            <div class="top-rest-label">Traffic</div>
-            <div class="top-rest-traffic">{{ humanBytesString(row.traffic) }}</div>
-
-            <div class="top-rest-label">Tools</div>
-            <div class="top-rest-tools">
-              <div v-for="(bytes, tool) in row.byTool" :key="tool">{{ tool }}: {{ humanBytesString(Number(bytes)) }}</div>
-            </div>
-
-            <div class="top-rest-label">Source</div>
-            <div class="top-rest-source">
-              <div v-for="(bytes, source) in row.bySource" :key="source">{{ source }}: {{ humanBytesString(Number(bytes)) }}</div>
-            </div>
-          </q-card>
-        </div>
-      </q-tab-panel>
-    </q-tab-panels>
+      <div v-if="currentData.length === 0" class="empty-state">
+        {{ $t('sidebarStats.noStats') }}
+      </div>
+    </div>
   </q-page>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { computed, defineComponent, h, onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 
-const activeTab = ref('day')
+interface MetricValue {
+  traffic: string
+  machine: number
+}
+
+interface DimensionValue {
+  tool: string
+  source?: string
+  attacker?: string
+  os?: string
+  traffic: string
+  machine: number
+}
+
+interface ChipRow {
+  name: string
+  traffic: string
+  machine: number
+}
+
+interface TopItem {
+  rank: number
+  login: string
+  traffic: string
+  machine: number
+  byTool: Record<string, MetricValue>
+  bySource: DimensionValue[]
+  byAttacker: DimensionValue[]
+  byOS: DimensionValue[]
+}
+
+interface LeaderboardApiUser {
+  rank: number
+  login: string
+  totalTraffic: string
+  machine: number
+  trafficByTool?: Record<string, MetricValue>
+  trafficBySource?: DimensionValue[]
+  trafficByAttacker?: DimensionValue[]
+  trafficByOs?: DimensionValue[]
+}
+
+const StatChipList = defineComponent({
+  name: 'StatChipList',
+  props: {
+    label: { type: String, required: true },
+    rows: { type: Array as () => ChipRow[], required: true },
+    compact: { type: Boolean, default: false }
+  },
+  setup (props) {
+    return () => h('div', { class: ['chip-list', props.compact ? 'chip-list--compact' : ''] }, [
+      h('div', { class: 'chip-list-label' }, props.label),
+      props.rows.length === 0
+        ? h('div', { class: 'chip-empty' }, '0')
+        : h('div', { class: 'chips' }, props.rows.map((row) => h('div', { class: 'stat-chip', key: row.name }, [
+          h('span', { class: 'stat-chip-name' }, row.name),
+          h('strong', humanBytesString(Number(row.traffic))),
+          h('em', `${formatNumber(row.machine)} machines`)
+        ])))
+    ])
+  }
+})
+
+const { t } = useI18n()
+const activeTab = ref<'day' | 'week' | 'month' | 'total'>('day')
+const loading = ref(false)
+
+const topDay = ref<TopItem[]>([])
+const topWeek = ref<TopItem[]>([])
+const topMonth = ref<TopItem[]>([])
+const topTotal = ref<TopItem[]>([])
+
+const currentData = computed(() => {
+  if (activeTab.value === 'day') return topDay.value
+  if (activeTab.value === 'week') return topWeek.value
+  if (activeTab.value === 'total') return topTotal.value
+  return topMonth.value
+})
+
+const topThree = computed(() => currentData.value.slice(0, 3))
+const restItems = computed(() => currentData.value.slice(3))
+const currentTotalTraffic = computed(() => currentData.value.reduce((sum, item) => sum + Number(item.traffic || 0), 0))
+const currentPeriodLabel = computed(() => t(`top.${activeTab.value}`))
+
+function filterPositive (items: ChipRow[], limit = 4): ChipRow[] {
+  return items
+    .filter((item) => Number(item.traffic) > 0 || item.machine > 0)
+    .sort((a, b) => Number(b.traffic) - Number(a.traffic))
+    .slice(0, limit)
+}
+
+function toolRows (row: TopItem): ChipRow[] {
+  return filterPositive(Object.entries(row.byTool || {}).map(([name, value]) => ({
+    name,
+    traffic: value.traffic,
+    machine: value.machine || 0
+  })))
+}
+
+function dimensionRows (items: DimensionValue[], field: 'source' | 'attacker' | 'os'): ChipRow[] {
+  return filterPositive((items || []).map((item) => ({
+    name: `${item.tool}: ${String(item[field] || '-')}`,
+    traffic: item.traffic,
+    machine: item.machine || 0
+  })))
+}
+
+function sourceRows (row: TopItem): ChipRow[] {
+  return dimensionRows(row.bySource, 'source')
+}
+
+function attackerRows (row: TopItem): ChipRow[] {
+  return dimensionRows(row.byAttacker, 'attacker')
+}
+
+function osRows (row: TopItem): ChipRow[] {
+  return dimensionRows(row.byOS, 'os')
+}
 
 function humanBytesString (bytes: number, dp = 1) {
+  if (!Number.isFinite(bytes)) return '0 B'
   const thresh = 1024
 
   if (Math.abs(bytes) < thresh) {
-    return bytes + ' B'
+    return `${bytes} B`
   }
 
   const units = ['KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
@@ -208,62 +244,39 @@ function humanBytesString (bytes: number, dp = 1) {
   do {
     bytes /= thresh
     ++u
-  } while (
-    Math.round(Math.abs(bytes) * r) / r >= thresh &&
-    u < units.length - 1
-  )
+  } while (Math.round(Math.abs(bytes) * r) / r >= thresh && u < units.length - 1)
 
-  return bytes.toFixed(dp) + ' ' + units[u]
+  return `${bytes.toFixed(dp)} ${units[u]}`
 }
 
-interface TopItem {
-  rank: number
-  login: string
-  traffic: number
-  byTool: Record<string, string>
-  byOS: Record<string, string>
-  bySource: Record<string, string>
+function formatNumber (value: number): string {
+  return new Intl.NumberFormat().format(value || 0)
 }
 
-const topDay = ref<TopItem[]>([])
-const topWeek = ref<TopItem[]>([])
-const topMonth = ref<TopItem[]>([])
-
-const currentData = computed(() => {
-  if (activeTab.value === 'day') return topDay.value
-  if (activeTab.value === 'week') return topWeek.value
-  return topMonth.value
-})
-
-const topThree = computed(() => currentData.value.filter((item) => item.rank <= 3))
-const restItems = computed(() => currentData.value.filter((item) => item.rank > 3))
+function mapUser (item: LeaderboardApiUser): TopItem {
+  return {
+    rank: item.rank,
+    login: item.login,
+    traffic: item.totalTraffic,
+    machine: item.machine || 0,
+    byTool: item.trafficByTool || {},
+    bySource: item.trafficBySource || [],
+    byAttacker: item.trafficByAttacker || [],
+    byOS: item.trafficByOs || []
+  }
+}
 
 async function loadTop () {
-  const data = await window.topAPI.getWeeklyTop()
-  topDay.value = (data.day || []).map((item) => ({
-    rank: item.rank,
-    login: item.login,
-    traffic: Number(item.traffic),
-    byTool: item.byTool || {},
-    byOS: item.byOS || {},
-    bySource: item.bySource || {}
-  }))
-  topWeek.value = (data.week || []).map((item) => ({
-    rank: item.rank,
-    login: item.login,
-    traffic: Number(item.traffic),
-    byTool: item.byTool || {},
-    byOS: item.byOS || {},
-    bySource: item.bySource || {}
-  }))
-  topMonth.value = (data.month || []).map((item) => ({
-    rank: item.rank,
-    login: item.login,
-    traffic: Number(item.traffic),
-    byTool: item.byTool || {},
-    byOS: item.byOS || {},
-    bySource: item.bySource || {}
-  }))
+  loading.value = true
+  try {
+    const data = await window.topAPI.getWeeklyTop()
+    topDay.value = (data.day || []).map(mapUser)
+    topWeek.value = (data.week || []).map(mapUser)
+    topMonth.value = (data.month || []).map(mapUser)
+    topTotal.value = (data.total || []).map(mapUser)
+  } finally {
+    loading.value = false
+  }
 }
 
 onMounted(async () => {
@@ -272,193 +285,37 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.top-podium {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+.top-page {
+  max-width: 1380px;
+  margin: 0 auto;
+  color: var(--app-shell-text);
+}
+
+.top-header,
+.leader-summary,
+.leader-machines,
+.rest-head,
+.rest-metrics {
+  display: flex;
+  align-items: center;
+}
+
+.top-header {
+  justify-content: space-between;
   gap: 16px;
-  margin-bottom: 24px;
-}
-
-.top-podium-item {
-  padding: 24px 16px;
-  border-radius: 16px;
-  background: var(--app-soft-surface);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
-  border: 1px solid var(--app-soft-border);
-  text-align: center;
-  position: relative;
-  transition: all 0.3s ease;
-}
-
-.top-podium-item--rank1 {
-  border-color: var(--app-accent-warm);
-  box-shadow: 0 8px 32px color-mix(in srgb, var(--app-accent-warm) 30%, transparent);
-  background: color-mix(in srgb, var(--app-accent-warm) 8%, var(--app-soft-surface));
-  order: 2;
-}
-
-.top-podium-item--rank1 .top-podium-rank {
-  background: var(--app-accent-warm);
-  color: #111;
-  font-size: 14px;
-  padding: 4px 12px;
-  border-radius: 10px;
-}
-
-.top-podium-item--rank1 .top-podium-name {
-  color: var(--app-accent-warm);
-  font-size: 18px;
-}
-
-.top-podium-item--rank2 {
-  border-color: color-mix(in srgb, var(--app-accent-warm) 40%, transparent);
-  order: 1;
-}
-
-.top-podium-item--rank2 .top-podium-rank {
-  background: color-mix(in srgb, var(--app-accent-warm) 70%, #111);
-}
-
-.top-podium-item--rank3 {
-  border-color: color-mix(in srgb, var(--app-accent-warm) 25%, transparent);
-  order: 3;
-}
-
-.top-podium-item--rank3 .top-podium-rank {
-  background: color-mix(in srgb, var(--app-accent-warm) 50%, #111);
-}
-
-.top-podium-rank {
-  position: absolute;
-  top: 12px;
-  left: 12px;
-  background: var(--app-muted-text);
-  color: #fff;
-  font-weight: 800;
-  font-size: 12px;
-  padding: 3px 8px;
-  border-radius: 8px;
-}
-
-.top-podium-label {
-  font-size: 11px;
-  text-transform: uppercase;
-  color: var(--app-muted-text);
-  margin-bottom: 1px;
-  letter-spacing: 0.3px;
-}
-
-.top-podium-name {
-  font-size: 16px;
-  font-weight: 700;
-  margin-bottom: 8px;
-  color: var(--app-shell-text);
-}
-
-.top-podium-traffic {
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--app-shell-text);
-}
-
-.top-podium-tools {
-  font-size: 12px;
-  color: #1a1a1a;
-  word-break: break-word;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  font-weight: 600;
-}
-
-.top-podium-source {
-  font-size: 12px;
-  color: #1a1a1a;
-  word-break: break-word;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  font-weight: 600;
-}
-
-.top-rest-list {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.top-rest-item {
-  padding: 12px;
-  border-radius: 12px;
-  background: var(--app-soft-surface);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-  border: 1px solid var(--app-soft-border);
-  text-align: center;
-  position: relative;
-  transition: all 0.2s ease;
-}
-
-.top-rest-item:hover {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-}
-
-.top-rest-rank {
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  background: var(--app-muted-text);
-  color: #fff;
-  font-weight: 800;
-  font-size: 11px;
-  padding: 2px 6px;
-  border-radius: 6px;
-}
-
-.top-rest-label {
-  font-size: 10px;
-  text-transform: uppercase;
-  color: var(--app-muted-text);
-  margin-bottom: 1px;
-  letter-spacing: 0.3px;
-}
-
-.top-rest-name {
-  font-size: 13px;
-  font-weight: 600;
-  margin-bottom: 6px;
-  color: var(--app-shell-text);
-  word-break: break-word;
-}
-
-.top-rest-traffic {
-  font-size: 13px;
-  font-weight: 600;
-  margin-bottom: 6px;
-  color: var(--app-shell-text);
-}
-
-.top-rest-tools {
-  font-size: 11px;
-  color: #1a1a1a;
-  word-break: break-word;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  font-weight: 600;
-}
-
-.top-rest-source {
-  font-size: 11px;
-  color: #1a1a1a;
-  word-break: break-word;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  font-weight: 600;
 }
 
 .top-title {
   color: var(--app-shell-text);
+}
+
+.top-muted,
+.summary-kicker,
+.leader-machines,
+.chip-list-label,
+.stat-chip em,
+.rest-metrics {
+  color: var(--app-muted-text);
 }
 
 .top-tabs :deep(.q-tab) {
@@ -473,37 +330,206 @@ onMounted(async () => {
   background: var(--app-accent-warm);
 }
 
-@media (max-width: 1400px) {
-  .top-podium {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+.leader-summary {
+  gap: 12px;
+}
+
+.leader-summary-card {
+  flex: 1;
+  border-radius: 8px;
+  background: var(--app-panel-bg);
+  border: 1px solid var(--app-panel-border);
+}
+
+.summary-kicker {
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0;
+}
+
+.summary-main {
+  margin-top: 6px;
+  font-size: 22px;
+  line-height: 1.1;
+  font-weight: 800;
+}
+
+.top-podium {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.top-card {
+  border-radius: 8px;
+  background: var(--app-panel-bg);
+  border: 1px solid var(--app-panel-border);
+}
+
+.top-podium-item {
+  position: relative;
+  min-height: 100%;
+}
+
+.top-podium-item--rank1 {
+  border-color: color-mix(in srgb, var(--app-accent-warm) 70%, var(--app-panel-border));
+  background: color-mix(in srgb, var(--app-accent-warm) 8%, var(--app-panel-bg));
+  order: 2;
+}
+
+.top-podium-item--rank2 {
+  order: 1;
+}
+
+.top-podium-item--rank3 {
+  order: 3;
+}
+
+.rank-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: var(--app-nav-active-bg);
+  color: #fff;
+  font-weight: 800;
+}
+
+.top-podium-item--rank1 .rank-pill {
+  background: var(--app-accent-warm);
+  color: #111;
+}
+
+.leader-name {
+  margin-top: 14px;
+  font-size: 20px;
+  line-height: 1.15;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.leader-traffic {
+  margin-top: 8px;
+  font-size: 26px;
+  line-height: 1.1;
+  font-weight: 900;
+  color: var(--app-accent-warm);
+}
+
+.leader-machines {
+  gap: 6px;
+  margin-top: 8px;
+  font-size: 13px;
+}
+
+.leader-block,
+.rest-details,
+.chip-list,
+.chips {
+  display: grid;
+  gap: 8px;
+}
+
+.chip-list-label {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0;
+}
+
+.chips {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.chip-list--compact .chips {
+  grid-template-columns: 1fr;
+}
+
+.stat-chip {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  padding: 8px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--app-accent-cool) 9%, transparent);
+  border: 1px solid color-mix(in srgb, var(--app-accent-cool) 16%, transparent);
+}
+
+.stat-chip-name,
+.stat-chip strong,
+.stat-chip em {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stat-chip strong {
+  font-size: 12px;
+}
+
+.stat-chip em {
+  font-style: normal;
+  font-size: 11px;
+}
+
+.chip-empty {
+  color: var(--app-muted-text);
+  font-size: 12px;
+}
+
+.top-rest-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.rest-head,
+.rest-metrics {
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.rest-head strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+
+.rest-metrics {
+  margin-top: 10px;
+  font-weight: 700;
+}
+
+.empty-state {
+  padding: 24px;
+  text-align: center;
+  color: var(--app-muted-text);
+}
+
+@media (max-width: 1180px) {
+  .top-podium,
+  .top-rest-list {
+    grid-template-columns: 1fr;
   }
 
-  .top-rest-list {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .top-podium-item--rank1,
+  .top-podium-item--rank2,
+  .top-podium-item--rank3 {
+    order: initial;
   }
 }
 
-@media (max-width: 900px) {
-  .top-podium {
-    grid-template-columns: 1fr;
-    max-width: 320px;
-    margin-left: auto;
-    margin-right: auto;
+@media (max-width: 760px) {
+  .leader-summary {
+    display: grid;
   }
 
-  .top-podium-item--rank1 {
-    order: 1;
-  }
-
-  .top-podium-item--rank2 {
-    order: 2;
-  }
-
-  .top-podium-item--rank3 {
-    order: 3;
-  }
-
-  .top-rest-list {
+  .chips {
     grid-template-columns: 1fr;
   }
 }

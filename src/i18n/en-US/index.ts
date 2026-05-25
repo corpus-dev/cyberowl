@@ -1,4 +1,4 @@
-﻿// This is just an example,
+// This is just an example,
 // so you can safely delete all default props below
 
 export default {
@@ -9,6 +9,7 @@ export default {
     schedule: 'Schedule',
     top: 'Leaderboard',
     developers: 'Developers',
+    personal_stats: 'User Statistics',
     appName: 'Cyber Owl'
   },
   schedule: {
@@ -95,9 +96,20 @@ export default {
   },
   top: {
     volunteers: 'TOP VOLUNTEERS',
+    subtitle: 'Live leaderboard from Corpus statistics API',
     day: 'Per Day',
     week: 'Per Week',
     month: 'Per Month',
+    total: 'Total',
+    refresh: 'Refresh',
+    currentPeriod: 'Period',
+    totalTraffic: 'Top 5 traffic',
+    visibleUsers: 'Users',
+    machines: 'machines',
+    tools: 'Tools',
+    sources: 'Sources',
+    attackers: 'Attackers',
+    os: 'OS',
     achievements: {
       peopleAreLikeShips: {
         title: 'People are like Ships',
@@ -110,7 +122,7 @@ export default {
         goodButton: "I'm silly. Please liberate me.",
         badButton: "I don't like Ukraine"
       }
-    },
+    }
 
   },
   bootstrap: {
@@ -214,7 +226,7 @@ export default {
       description: 'Service tools for troubleshooting.',
       openProfileFolder: 'Profile folder',
       openStabilityLog: 'Stability log'
-    },
+    }
 
   },
 
@@ -273,6 +285,41 @@ export default {
     contributors: 'Contributors',
     contributorsSubtitle: 'Help improve the program and your name will automatically appear in this list. The list also shows contributors to the previous version of the application and some modules.'
   },
-
+  personalStats: {
+    title: 'User Statistics',
+    updatedFromApi: 'Traffic, tools, sources, attackers, OS and machines from Corpus statistics API',
+    apiKeyLabel: 'API Key',
+    loadBtn: 'Load',
+    refresh: 'Refresh',
+    overall: 'Overall Information',
+    login: 'Login',
+    totalTraffic: 'Total Traffic',
+    allTime: 'All time',
+    machine: 'Machines',
+    machineShort: 'machines',
+    uniqueMachines: 'Unique client_id values',
+    createdDate: 'Registration Date',
+    byTool: 'By Module',
+    bySource: 'By Source',
+    byAttacker: 'By Attacker',
+    byOS: 'By OS',
+    periods: 'Periods',
+    day: 'Per Day',
+    week: 'Per Week',
+    month: 'Per Month',
+    noData: 'No data for selected period',
+    traffic: 'Traffic',
+    dayPeriod: 'Date',
+    weekPeriod: 'Week',
+    monthPeriod: 'Month'
+  },
+  sidebarStats: {
+    totalTraffic: 'Traffic',
+    byTool: 'By Module',
+    noStats: 'No data',
+    period: 'Period',
+    day: 'Day',
+    week: 'Week',
+    month: 'Month'
+  }
 }
-

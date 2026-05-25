@@ -28,7 +28,7 @@ import type { State as ExecutionEngineState, ExecutionLogEntry } from './handler
 import type { TopData } from './handlers/top'
 import type { SettingsData } from './handlers/settings'
 import type { Contributor } from './handlers/developers'
-import type { GetUserStatsResponse as GetCorpusUserStatsResponse } from '../lib/corpus/api'
+import type { GetUserStatsResponse as GetCorpusUserStatsResponse, TrafficStatsResponse } from '../lib/corpus/api'
 
 type ModuleConfig = DistressConfig | MHDDOSProxyConfig
 type RendererListener<T> = (_e: IpcRendererEvent, data: T) => void
@@ -261,11 +261,21 @@ const developersAPI = {
 }
 contextBridge.exposeInMainWorld('developersAPI', developersAPI)
 
-
-
 const corpusAPI = {
   async getStats (): Promise<GetCorpusUserStatsResponse> {
     return await invoke<GetCorpusUserStatsResponse>('corpus:getStats')
+  },
+  async getUserTraffic (apiKey: string): Promise<TrafficStatsResponse> {
+    return await invoke<TrafficStatsResponse>('corpus:getUserTraffic', apiKey)
+  },
+  async getUserTrafficDay (apiKey: string): Promise<TrafficStatsResponse> {
+    return await invoke<TrafficStatsResponse>('corpus:getUserTrafficDay', apiKey)
+  },
+  async getUserTrafficWeek (apiKey: string): Promise<TrafficStatsResponse> {
+    return await invoke<TrafficStatsResponse>('corpus:getUserTrafficWeek', apiKey)
+  },
+  async getUserTrafficMonth (apiKey: string): Promise<TrafficStatsResponse> {
+    return await invoke<TrafficStatsResponse>('corpus:getUserTrafficMonth', apiKey)
   }
 }
 contextBridge.exposeInMainWorld('corpusAPI', corpusAPI)

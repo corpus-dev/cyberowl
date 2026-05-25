@@ -11,4 +11,20 @@ export function handleCorpus (settings: Settings) {
 
     return await client.getUserStats(apiKey)
   })
+
+  ipcMain.handle('corpus:getUserTraffic', async (_e, apiKey: string) => {
+    return await client.getUserTraffic(apiKey)
+  })
+
+  ipcMain.handle('corpus:getUserTrafficDay', async (_e, apiKey: string) => {
+    return await client.getUserTrafficDay(apiKey)
+  })
+
+  ipcMain.handle('corpus:getUserTrafficWeek', async (_e, apiKey: string) => {
+    return await client.getUserTrafficWeek(apiKey)
+  })
+
+  ipcMain.handle('corpus:getUserTrafficMonth', async (_e, apiKey: string) => {
+    return await client.getUserTrafficMonth(apiKey)
+  })
 }

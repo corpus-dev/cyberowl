@@ -1,63 +1,80 @@
 import { ipcMain } from 'electron'
 import { electronNetFetch } from '../../lib/utils/electronNet'
 
-export interface TopItem {
-    rank: number
-    login: string
-    traffic: string
-    byTool: Record<string, string>
-    byOS: Record<string, string>
-    bySource: Record<string, string>
+export interface LeaderboardUser {
+  rank: number
+  login: string
+  totalTraffic: string
+  machine: number
+  trafficByTool: Record<string, { traffic: string; machine: number }>
+  trafficBySource: Array<{ tool: string; source: string; traffic: string; machine: number }>
+  trafficByAttacker: Array<{ tool: string; attacker: string; traffic: string; machine: number }>
+  trafficByOs: Array<{ tool: string; os: string; traffic: string; machine: number }>
 }
 
-export interface PeriodData {
-    date?: string
-    week?: string
-    month?: string
-    items: TopItem[]
-}
-
-export interface TopApiResponse {
-    success: boolean
-    error: string
-    data: {
-        periods: {
-            day: PeriodData
-            week: PeriodData
-            month: PeriodData
-        }
-    }
+export interface LeaderboardApiResponse {
+  success: boolean
+  error: string
+  data: {
+    period: string
+    periodKey: string
+    users: LeaderboardUser[]
+  }
 }
 
 export interface TopData {
-    day: TopItem[]
-    week: TopItem[]
-    month: TopItem[]
+  day: LeaderboardUser[]
+  week: LeaderboardUser[]
+  month: LeaderboardUser[]
+  total: LeaderboardUser[]
+}
+
+let leaderboardCache: TopData | null = null
+let leaderboardCacheTime: Date | null = null
+const CACHE_DURATION_MS = 1000 * 60 * 10 // 10 minutes
+
+async function fetchLeaderboard (period: string): Promise<LeaderboardUser[]> {
+  try {
+    const response = await electronNetFetch(`https://corpsstats.bl4ck.dev/api/user/leaderboard/${period}`)
+    if (response.status !== 200) {
+      console.warn(`[top] ${period} failed with status ${response.status}`)
+      return []
+    }
+    const json = await response.json() as LeaderboardApiResponse
+    if (!json.success) {
+      console.warn(`[top] ${period} backend error: ${json.error}`)
+      return []
+    }
+    return json.data?.users || []
+  } catch (err) {
+    console.error(`[top] ${period} fetch error:`, err)
+    return []
+  }
+}
+
+async function fetchAllLeaderboards (): Promise<TopData> {
+  const [day, week, month, total] = await Promise.all([
+    fetchLeaderboard('day'),
+    fetchLeaderboard('week'),
+    fetchLeaderboard('month'),
+    fetchLeaderboard('total')
+  ])
+  return { day, week, month, total }
 }
 
 async function getTopData (): Promise<TopData> {
-  try {
-    const response = await electronNetFetch('https://corpsstats.bl4ck.dev/api/tools/global-topusers')
-    if (response.status !== 200) {
-      return {
-        day: [],
-        week: [],
-        month: []
-      }
-    }
-    const json = await response.json() as TopApiResponse
-    return {
-      day: json.data.periods.day.items || [],
-      week: json.data.periods.week.items || [],
-      month: json.data.periods.month.items || []
-    }
-  } catch {
-    return {
-      day: [],
-      week: [],
-      month: []
+  if (leaderboardCache !== null && leaderboardCacheTime !== null) {
+    const now = new Date()
+    const diff = now.getTime() - leaderboardCacheTime.getTime()
+    if (diff < CACHE_DURATION_MS) {
+      return leaderboardCache
     }
   }
+
+  const data = await fetchAllLeaderboards()
+  leaderboardCache = data
+  leaderboardCacheTime = new Date()
+  return data
 }
 
 export function handleTop () {
