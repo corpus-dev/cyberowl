@@ -21,6 +21,33 @@ function getRendererContext () {
   }
 }
 
+function runWhenIdle (callback: () => void) {
+  const requestIdle = window.requestIdleCallback ?? ((handler: (deadline: { didTimeout: boolean, timeRemaining: () => number }) => void) => {
+    return window.setTimeout(() => handler({
+      didTimeout: false,
+      timeRemaining: () => 0
+    }), 1200)
+  })
+
+  requestIdle(callback, { timeout: 3500 })
+}
+
+function warmRouteChunks () {
+  runWhenIdle(() => {
+    void Promise.allSettled([
+      import('pages/dashboard/DashboardPage.vue'),
+      import('pages/modules/ActiveModulePage.vue'),
+      import('pages/modules/mhddosproxyPage.vue'),
+      import('pages/modules/distressPage.vue'),
+      import('pages/SettingsPage.vue'),
+      import('pages/SchedulePage.vue'),
+      import('pages/personalStats/PersonalStatsPage.vue'),
+      import('pages/top/TopPage.vue'),
+      import('pages/developers/DevelopersPage.vue')
+    ])
+  })
+}
+
 export default boot(({ app, router }) => {
   window.addEventListener('error', (event) => {
     void window.helpersAPI.logRendererEvent('window-error', {
@@ -57,4 +84,8 @@ export default boot(({ app, router }) => {
       context: getRendererContext()
     })
   })
+
+  if (typeof window !== 'undefined') {
+    window.addEventListener('load', warmRouteChunks, { once: true })
+  }
 })

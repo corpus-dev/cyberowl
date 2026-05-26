@@ -17,7 +17,7 @@
         icon="refresh"
         :loading="loading"
         :disable="!apiKey.trim()"
-        @click="loadStats"
+        @click="loadStats(true)"
       >
         <q-tooltip>{{ $t('personalStats.refresh') }}</q-tooltip>
       </q-btn>
@@ -60,12 +60,9 @@
           </q-card-section>
         </q-card>
 
-        <q-card flat bordered class="stat-card chart-card">
-          <q-card-section v-if="chartTools.length > 0">
+        <q-card v-if="chartTools.length > 0" flat bordered class="stat-card chart-card">
+          <q-card-section>
             <VueApexCharts type="donut" :options="totalChartOptions" :series="totalChartSeries" height="190" />
-          </q-card-section>
-          <q-card-section v-else class="empty-state">
-            {{ $t('sidebarStats.noStats') }}
           </q-card-section>
         </q-card>
       </section>
@@ -82,13 +79,21 @@
               <div class="period-traffic">{{ humanBytesString(Number(period.data.traffic)) }}</div>
               <div class="period-meta">
                 <span>{{ period.periodKey }}</span>
-                <span>{{ formatNumber(period.data.machine) }} {{ $t('personalStats.machineShort') }}</span>
+                <span v-if="period.data.machine > 0">{{ formatNumber(period.data.machine) }} {{ $t('personalStats.machineShort') }}</span>
               </div>
-              <div class="mini-bars q-mt-md">
-                <div v-for="row in topTools(period.data.byTool, 4)" :key="row.name" class="mini-row">
-                  <span>{{ row.name }}</span>
-                  <strong>{{ humanBytesString(Number(row.traffic)) }}</strong>
-                </div>
+              <div class="period-breakdown q-mt-md">
+                <period-breakdown-list
+                  :label="$t('personalStats.byTool')"
+                  :rows="topTools(period.data.byTool, 4)"
+                />
+                <period-breakdown-list
+                  :label="$t('personalStats.bySource')"
+                  :rows="dimensionRows(period.data.bySource, 'source', 4)"
+                />
+                <period-breakdown-list
+                  :label="$t('personalStats.byAttacker')"
+                  :rows="dimensionRows(period.data.byAttacker, 'attacker', 4)"
+                />
               </div>
             </q-card-section>
           </q-card>
@@ -96,7 +101,7 @@
       </section>
 
       <section class="detail-grid">
-        <q-card flat bordered class="stat-card">
+        <q-card v-if="toolRows.length > 0" flat bordered class="stat-card">
           <q-card-section>
             <stat-list
               :title="$t('personalStats.byTool')"
@@ -106,7 +111,7 @@
           </q-card-section>
         </q-card>
 
-        <q-card flat bordered class="stat-card">
+        <q-card v-if="sourceRows.length > 0" flat bordered class="stat-card">
           <q-card-section>
             <stat-list
               :title="$t('personalStats.bySource')"
@@ -116,7 +121,7 @@
           </q-card-section>
         </q-card>
 
-        <q-card flat bordered class="stat-card">
+        <q-card v-if="attackerRows.length > 0" flat bordered class="stat-card">
           <q-card-section>
             <stat-list
               :title="$t('personalStats.byAttacker')"
@@ -126,12 +131,13 @@
           </q-card-section>
         </q-card>
 
-        <q-card flat bordered class="stat-card">
+        <q-card v-if="osRows.length > 0" flat bordered class="stat-card">
           <q-card-section>
             <stat-list
               :title="$t('personalStats.byOS')"
               icon="devices"
               :rows="osRows"
+              machine-only
             />
           </q-card-section>
         </q-card>
@@ -189,7 +195,7 @@ interface TrafficStats {
 
 interface DisplayRow {
   name: string
-  detail: string
+  detail?: string
   traffic: string
   machine: number
 }
@@ -199,7 +205,8 @@ const StatList = defineComponent({
   props: {
     title: { type: String, required: true },
     icon: { type: String, required: true },
-    rows: { type: Array as () => DisplayRow[], required: true }
+    rows: { type: Array as () => DisplayRow[], required: true },
+    machineOnly: { type: Boolean, default: false }
   },
   setup (props) {
     return () => h('div', { class: 'stat-list' }, [
@@ -208,18 +215,41 @@ const StatList = defineComponent({
         h('span', props.title)
       ]),
       props.rows.length === 0
-        ? h('div', { class: 'empty-state' }, 'No data')
+        ? h('div', { class: 'empty-state' }, t('sidebarStats.noStats'))
         : h('div', { class: 'stat-list-rows' }, props.rows.map((row) => h('div', { class: 'stat-row', key: row.name + row.detail }, [
           h('div', { class: 'stat-row-name' }, [
             h('strong', row.name),
-            h('span', row.detail)
+            row.detail ? h('span', row.detail) : null
           ]),
-          h('div', { class: 'stat-row-values' }, [
-            h('strong', humanBytesString(Number(row.traffic))),
-            h('span', `${formatNumber(row.machine)} machines`)
+          h('div', { class: ['stat-row-values', props.machineOnly ? 'stat-row-values--machine-only' : ''] }, [
+            props.machineOnly ? null : h('strong', humanBytesString(Number(row.traffic))),
+            row.machine > 0 ? h('span', `${formatNumber(row.machine)} ${t('personalStats.machineShort')}`) : null
           ])
         ])))
     ])
+  }
+})
+
+const PeriodBreakdownList = defineComponent({
+  name: 'PeriodBreakdownList',
+  props: {
+    label: { type: String, required: true },
+    rows: { type: Array as () => DisplayRow[], required: true }
+  },
+  setup (props) {
+    return () => {
+      if (props.rows.length === 0) return null
+      return h('div', { class: 'period-breakdown-list' }, [
+        h('div', { class: 'period-breakdown-label' }, props.label),
+        h('div', { class: 'period-breakdown-rows' }, props.rows.map((row) => h('div', { class: 'period-breakdown-row', key: `${row.detail || ''}:${row.name}` }, [
+          h('div', { class: 'period-breakdown-name' }, [
+            h('span', row.name),
+            row.detail ? h('em', row.detail) : null
+          ]),
+          h('strong', humanBytesString(Number(row.traffic)))
+        ])))
+      ])
+    }
   }
 })
 
@@ -281,14 +311,13 @@ const periodCards = computed(() => {
 
 const toolRows = computed(() => topTools(stats.value?.byTool || {}, 20).map((row) => ({
   name: row.name,
-  detail: `${formatNumber(row.machine)} machines`,
   traffic: row.traffic,
   machine: row.machine
 })))
 
 const sourceRows = computed(() => dimensionRows(stats.value?.bySource || [], 'source'))
 const attackerRows = computed(() => dimensionRows(stats.value?.byAttacker || [], 'attacker'))
-const osRows = computed(() => dimensionRows(stats.value?.byOS || [], 'os'))
+const osRows = computed(() => machineRows(stats.value?.byOS || [], 'os'))
 
 function topTools (tools: Record<string, ToolStat>, limit: number) {
   return Object.entries(tools)
@@ -298,7 +327,7 @@ function topTools (tools: Record<string, ToolStat>, limit: number) {
     .slice(0, limit)
 }
 
-function dimensionRows (items: DimensionStat[], field: 'source' | 'attacker' | 'os'): DisplayRow[] {
+function dimensionRows (items: DimensionStat[], field: 'source' | 'attacker' | 'os', limit?: number): DisplayRow[] {
   return items
     .filter((item) => Number(item.traffic) > 0 || item.machine > 0)
     .map((item) => ({
@@ -308,6 +337,19 @@ function dimensionRows (items: DimensionStat[], field: 'source' | 'attacker' | '
       machine: item.machine || 0
     }))
     .sort((a, b) => Number(b.traffic) - Number(a.traffic))
+    .slice(0, limit)
+}
+
+function machineRows (items: DimensionStat[], field: 'source' | 'attacker' | 'os'): DisplayRow[] {
+  return items
+    .filter((item) => item.machine > 0)
+    .map((item) => ({
+      name: String(item[field] || '-'),
+      detail: item.tool,
+      traffic: item.traffic,
+      machine: item.machine || 0
+    }))
+    .sort((a, b) => b.machine - a.machine)
 }
 
 function humanBytesString (bytes: number, dp = 1): string {
@@ -333,13 +375,13 @@ function formatDate (dateStr: string): string {
   return new Date(dateStr).toLocaleDateString()
 }
 
-async function loadStats () {
+async function loadStats (force = false) {
   if (!apiKey.value.trim() || loading.value) return
   loading.value = true
   error.value = ''
 
   try {
-    const result = await window.corpusAPI.getUserTraffic(apiKey.value.trim())
+    const result = await window.corpusAPI.getUserTraffic(apiKey.value.trim(), force)
     if (!result.success) {
       error.value = result.error || 'Unable to load statistics'
       return
@@ -363,7 +405,7 @@ onMounted(async () => {
     if (apiKey.value.trim()) {
       await loadStats()
     } else {
-      error.value = 'Corpus API key is not configured'
+      error.value = 'Corpus API Key is not configured'
     }
   } catch (err) {
     error.value = String(err)
@@ -432,6 +474,8 @@ onMounted(async () => {
   border-radius: 8px;
   background: var(--app-panel-bg);
   border: 1px solid var(--app-panel-border);
+  content-visibility: auto;
+  contain-intrinsic-size: 220px;
 }
 
 .summary-card {
@@ -500,29 +544,139 @@ onMounted(async () => {
   font-size: 12px;
 }
 
-.mini-bars,
+.period-breakdown,
 .stat-list-rows {
   display: grid;
   gap: 8px;
 }
 
-.mini-row {
+.period-breakdown-list {
+  display: grid;
+  gap: 6px;
+}
+
+.period-breakdown-label {
+  color: var(--app-muted-text);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.period-breakdown-rows {
+  display: grid;
+  gap: 6px;
+}
+
+.period-breakdown-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
   justify-content: space-between;
   gap: 8px;
-  min-height: 24px;
-  padding: 4px 8px;
+  min-height: 28px;
+  padding: 5px 8px;
   border-radius: 6px;
   background: color-mix(in srgb, var(--app-accent-cool) 10%, transparent);
   font-size: 12px;
 }
 
-.mini-row span,
+.period-breakdown-name {
+  display: grid;
+  min-width: 0;
+  gap: 1px;
+}
+
+.period-breakdown-name span,
+.period-breakdown-name em,
+.period-breakdown-row strong,
 .stat-row-name strong,
 .stat-row-name span {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.period-breakdown-name em {
+  color: var(--app-muted-text);
+  font-size: 11px;
+  font-style: normal;
+}
+
+.period-breakdown-row strong {
+  color: var(--app-accent-warm);
+  font-size: 12px;
+}
+
+:deep(.period-breakdown) {
+  display: grid;
+  gap: 10px;
+}
+
+:deep(.period-breakdown-list) {
+  display: grid;
+  gap: 6px;
+}
+
+:deep(.period-breakdown-label) {
+  color: var(--app-muted-text);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+:deep(.period-breakdown-rows) {
+  display: grid;
+  gap: 6px;
+}
+
+:deep(.period-breakdown-row) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  min-height: 34px;
+  padding: 7px 9px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--app-accent-cool) 10%, transparent);
+}
+
+:deep(.period-breakdown-name) {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+:deep(.period-breakdown-name span),
+:deep(.period-breakdown-name em),
+:deep(.period-breakdown-row strong) {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+:deep(.period-breakdown-name span) {
+  color: var(--app-shell-text);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+:deep(.period-breakdown-name em) {
+  width: fit-content;
+  max-width: 100%;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--app-accent-warm) 14%, transparent);
+  color: var(--app-muted-text);
+  font-size: 11px;
+  font-style: normal;
+}
+
+:deep(.period-breakdown-row strong) {
+  color: var(--app-accent-warm);
+  font-size: 13px;
+  font-weight: 800;
 }
 
 .stat-list-header {
@@ -537,8 +691,9 @@ onMounted(async () => {
 }
 
 .stat-row {
-  justify-content: space-between;
-  gap: 12px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px;
   padding: 10px 0;
   border-top: 1px solid var(--app-panel-header-border);
 }
@@ -546,13 +701,115 @@ onMounted(async () => {
 .stat-row-name,
 .stat-row-values {
   display: grid;
-  gap: 2px;
+  min-width: 0;
+  gap: 3px;
+}
+
+.stat-row-name strong,
+.stat-row-name span,
+.stat-row-values strong,
+.stat-row-values span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stat-row-name strong {
+  font-size: 14px;
+}
+
+.stat-row-name span {
+  font-size: 12px;
 }
 
 .stat-row-values {
   justify-items: end;
   text-align: right;
   flex-shrink: 0;
+}
+
+.stat-row-values strong {
+  color: var(--app-accent-warm);
+}
+
+:deep(.stat-list) {
+  display: grid;
+  gap: 10px;
+}
+
+:deep(.stat-list-header) {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+  font-weight: 800;
+}
+
+:deep(.stat-list-header .q-icon) {
+  color: var(--app-accent-cool);
+  font-size: 20px;
+}
+
+:deep(.stat-list-rows) {
+  display: grid;
+  gap: 8px;
+}
+
+:deep(.stat-row) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  min-height: 42px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--app-accent-cool) 9%, transparent);
+  border: 1px solid color-mix(in srgb, var(--app-accent-cool) 14%, transparent);
+}
+
+:deep(.stat-row-name),
+:deep(.stat-row-values) {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+:deep(.stat-row-name strong),
+:deep(.stat-row-name span),
+:deep(.stat-row-values strong),
+:deep(.stat-row-values span) {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+:deep(.stat-row-name strong) {
+  color: var(--app-shell-text);
+  font-size: 14px;
+}
+
+:deep(.stat-row-name span),
+:deep(.stat-row-values span) {
+  color: var(--app-muted-text);
+  font-size: 12px;
+}
+
+:deep(.stat-row-values) {
+  justify-items: end;
+  text-align: right;
+}
+
+:deep(.stat-row-values strong) {
+  color: var(--app-accent-warm);
+  font-size: 14px;
+}
+
+:deep(.stat-row-values--machine-only span) {
+  color: var(--app-accent-warm);
+  font-size: 14px;
+  font-weight: 800;
 }
 
 .empty-state,

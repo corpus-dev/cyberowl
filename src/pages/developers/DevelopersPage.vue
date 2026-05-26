@@ -8,8 +8,8 @@
           <div class="full-width text-subtitle2">
             {{ $t("developers.itaySubtitle") }}
           </div>
-          <a href="https://t.me/kiberkorpus" target="_blank"
-            >https://t.me/kiberkorpus</a
+          <a href="https://t.me/corps_statistics_bot" target="_blank"
+            >https://t.me/corps_statistics_bot</a
           >
         </div>
       </q-card-section>
@@ -66,8 +66,8 @@
       <q-card-section>
         <p>
           1. {{ $t("developers.contactP1") }}
-          <a href="https://t.me/kiberkorpus" target="_blank"
-            >https://t.me/kiberkorpus</a
+          <a href="https://t.me/corps_statistics_bot" target="_blank"
+            >https://t.me/corps_statistics_bot</a
           >. {{ $t("developers.contactP1_2") }}
         </p>
         <p>
@@ -109,7 +109,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 
 import { Contributor } from 'app/src-electron/handlers/developers'
 

@@ -16,6 +16,26 @@ import { QScrollArea } from 'quasar'
 
 const log = ref('')
 const scroll = ref<QScrollArea>()
+let scrollFrame: number | undefined
+
+function scrollToBottomSoon () {
+  if (scrollFrame !== undefined) {
+    return
+  }
+
+  scrollFrame = window.requestAnimationFrame(() => {
+    scrollFrame = undefined
+    scroll.value?.setScrollPercentage('vertical', 1, 0)
+  })
+}
+
+function appendLog (data: string) {
+  log.value += data
+  if (log.value.length > 10000) {
+    log.value = log.value.slice(-9000)
+  }
+  scrollToBottomSoon()
+}
 
 async function loadState () {
   const executionEngineState = await window.executionEngineAPI.getState()
@@ -25,33 +45,20 @@ async function loadState () {
 
   // Has to be executed after first draw of the component to be able to adjust size
   setTimeout(() => {
-    scroll.value?.setScrollPercentage('vertical', 1, 1000)
+    scrollToBottomSoon()
   }, 500)
 }
 
 function onExecutionLog (_e: IpcRendererEvent, data: unknown) {
-  data = JSON.stringify(data) + '\n'
-  log.value += data
-  while (log.value.length > 10000) {
-    log.value = log.value.slice(1000)
-  }
-  scroll.value?.setScrollPercentage('vertical', 1, 1000)
+  appendLog(JSON.stringify(data) + '\n')
 }
 
 function onStdOut (_e: IpcRendererEvent, data: string) {
-  log.value += data
-  while (log.value.length > 10000) {
-    log.value = log.value.slice(1000)
-  }
-  scroll.value?.setScrollPercentage('vertical', 1, 1000)
+  appendLog(data)
 }
 
 function onStdErr (_e: IpcRendererEvent, data: string) {
-  log.value += data
-  while (log.value.length > 10000) {
-    log.value = log.value.slice(1000)
-  }
-  scroll.value?.setScrollPercentage('vertical', 1, 1000)
+  appendLog(data)
 }
 
 onMounted(async () => {
@@ -65,6 +72,10 @@ onUnmounted(() => {
   window.executionEngineAPI.stopListeningForExecutionLog(onExecutionLog)
   window.executionEngineAPI.stopListeningForStdOut(onStdOut)
   window.executionEngineAPI.stopListeningForStdErr(onStdErr)
+  if (scrollFrame !== undefined) {
+    window.cancelAnimationFrame(scrollFrame)
+    scrollFrame = undefined
+  }
 })
 
 </script>

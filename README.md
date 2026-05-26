@@ -74,3 +74,30 @@ yarn smoke:stability
 ## Дані застосунку
 
 Робочі дані зберігаються в `CyberOwlProfile` всередині Electron `appData`.
+
+## Corpus statistics views
+
+CyberOwl reads statistics from `https://corpsstats.bl4ck.dev/api/user`.
+
+Personal statistics use the configured Corpus API Key:
+
+```text
+GET /api/user/traffic/all?apiKey={apiKey}
+GET /api/user/traffic/month?apiKey={apiKey}
+GET /api/user/traffic/week?apiKey={apiKey}
+GET /api/user/traffic/day?apiKey={apiKey}
+```
+
+Users can get their Corpus ID and Corpus API Key from the Telegram bot:
+https://t.me/corps_statistics_bot
+
+Top volunteers use:
+
+```text
+GET /api/user/leaderboard/total
+GET /api/user/leaderboard/month
+GET /api/user/leaderboard/week
+GET /api/user/leaderboard/day
+```
+
+The UI displays traffic, tools, source, attacker, OS, and machine counts, and hides empty dimension values. Manual refresh bypasses the in-app cache; normal background cache TTL is 2 minutes.

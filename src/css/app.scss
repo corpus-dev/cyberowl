@@ -79,22 +79,22 @@ body.app-theme--dark {
   --app-accent-cool: #4f9aa4;
 }
 
-body,
-.q-layout,
-.q-page-container,
-.q-page {
+body {
   background:
     linear-gradient(135deg, var(--app-camo-a) 0 18%, transparent 18% 42%, var(--app-camo-b) 42% 54%, transparent 54%),
     linear-gradient(180deg, #f6f4ea 0%, #ece9d8 100%);
 }
 
-body.app-theme--dark,
-body.app-theme--dark .q-layout,
-body.app-theme--dark .q-page-container,
-body.app-theme--dark .q-page {
+body.app-theme--dark {
   background:
     linear-gradient(135deg, rgba(82, 101, 45, 0.12) 0 18%, transparent 18% 42%, rgba(194, 143, 44, 0.06) 42% 54%, transparent 54%),
     linear-gradient(180deg, #11140f 0%, #171b12 100%);
+}
+
+.q-layout,
+.q-page-container,
+.q-page {
+  background: transparent;
 }
 
 .q-card {

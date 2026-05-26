@@ -6,7 +6,7 @@
         <div class="text-caption top-muted">{{ $t('top.subtitle') }}</div>
       </div>
 
-      <q-btn round flat color="primary" icon="refresh" :loading="loading" @click="loadTop">
+      <q-btn round flat color="primary" icon="refresh" :loading="loading" @click="loadTop(true)">
         <q-tooltip>{{ $t('top.refresh') }}</q-tooltip>
       </q-btn>
     </div>
@@ -36,12 +36,6 @@
             <div class="summary-main">{{ humanBytesString(currentTotalTraffic) }}</div>
           </q-card-section>
         </q-card>
-        <q-card flat bordered class="leader-summary-card">
-          <q-card-section>
-            <div class="summary-kicker">{{ $t('top.visibleUsers') }}</div>
-            <div class="summary-main">{{ currentData.length }}</div>
-          </q-card-section>
-        </q-card>
       </section>
 
       <section v-if="topThree.length > 0" class="top-podium q-mb-lg">
@@ -54,19 +48,25 @@
           :class="'top-podium-item--rank' + row.rank"
         >
           <q-card-section>
-            <div class="rank-pill">#{{ row.rank }}</div>
+            <div class="leader-card-head">
+              <div class="rank-pill">#{{ row.rank }}</div>
+              <div v-if="row.rank === 1" class="top-one-badge">
+                <q-icon name="workspace_premium" size="16px" />
+                <span>{{ $t('top.leader') }}</span>
+              </div>
+            </div>
             <div class="leader-name">{{ row.login }}</div>
             <div class="leader-traffic">{{ humanBytesString(Number(row.traffic)) }}</div>
-            <div class="leader-machines">
+            <div v-if="activeTab !== 'total'" class="leader-machines">
               <q-icon name="dns" size="16px" />
               <span>{{ formatNumber(row.machine) }} {{ $t('top.machines') }}</span>
             </div>
 
             <div class="leader-block q-mt-md">
-              <stat-chip-list :label="$t('top.tools')" :rows="toolRows(row)" />
-              <stat-chip-list :label="$t('top.sources')" :rows="sourceRows(row)" />
-              <stat-chip-list :label="$t('top.attackers')" :rows="attackerRows(row)" />
-              <stat-chip-list :label="$t('top.os')" :rows="osRows(row)" />
+              <stat-chip-list :label="$t('top.tools')" :rows="toolRows(row)" :machine-label="$t('top.machines')" :show-machines="activeTab !== 'total'" />
+              <stat-chip-list :label="$t('top.sources')" :rows="sourceRows(row)" :machine-label="$t('top.machines')" :show-machines="activeTab !== 'total'" />
+              <stat-chip-list :label="$t('top.attackers')" :rows="attackerRows(row)" :machine-label="$t('top.machines')" :show-machines="activeTab !== 'total'" />
+              <stat-chip-list :label="$t('top.os')" :rows="osRows(row)" :machine-label="$t('top.machines')" machine-only />
             </div>
           </q-card-section>
         </q-card>
@@ -87,13 +87,13 @@
             </div>
             <div class="rest-metrics">
               <span>{{ humanBytesString(Number(row.traffic)) }}</span>
-              <span>{{ formatNumber(row.machine) }} {{ $t('top.machines') }}</span>
+              <span v-if="activeTab !== 'total'">{{ formatNumber(row.machine) }} {{ $t('top.machines') }}</span>
             </div>
             <div class="rest-details q-mt-sm">
-              <stat-chip-list :label="$t('top.tools')" :rows="toolRows(row)" compact />
-              <stat-chip-list :label="$t('top.sources')" :rows="sourceRows(row)" compact />
-              <stat-chip-list :label="$t('top.attackers')" :rows="attackerRows(row)" compact />
-              <stat-chip-list :label="$t('top.os')" :rows="osRows(row)" compact />
+              <stat-chip-list :label="$t('top.tools')" :rows="toolRows(row)" :machine-label="$t('top.machines')" compact :show-machines="activeTab !== 'total'" />
+              <stat-chip-list :label="$t('top.sources')" :rows="sourceRows(row)" :machine-label="$t('top.machines')" compact :show-machines="activeTab !== 'total'" />
+              <stat-chip-list :label="$t('top.attackers')" :rows="attackerRows(row)" :machine-label="$t('top.machines')" compact :show-machines="activeTab !== 'total'" />
+              <stat-chip-list :label="$t('top.os')" :rows="osRows(row)" :machine-label="$t('top.machines')" compact machine-only />
             </div>
           </q-card-section>
         </q-card>
@@ -126,6 +126,7 @@ interface DimensionValue {
 
 interface ChipRow {
   name: string
+  detail?: string
   traffic: string
   machine: number
 }
@@ -157,19 +158,32 @@ const StatChipList = defineComponent({
   props: {
     label: { type: String, required: true },
     rows: { type: Array as () => ChipRow[], required: true },
-    compact: { type: Boolean, default: false }
+    machineLabel: { type: String, required: true },
+    compact: { type: Boolean, default: false },
+    showMachines: { type: Boolean, default: true },
+    machineOnly: { type: Boolean, default: false }
   },
   setup (props) {
-    return () => h('div', { class: ['chip-list', props.compact ? 'chip-list--compact' : ''] }, [
-      h('div', { class: 'chip-list-label' }, props.label),
-      props.rows.length === 0
-        ? h('div', { class: 'chip-empty' }, '0')
-        : h('div', { class: 'chips' }, props.rows.map((row) => h('div', { class: 'stat-chip', key: row.name }, [
-          h('span', { class: 'stat-chip-name' }, row.name),
-          h('strong', humanBytesString(Number(row.traffic))),
-          h('em', `${formatNumber(row.machine)} machines`)
+    return () => {
+      if (props.rows.length === 0) return null
+      return h('div', { class: ['chip-list', props.compact ? 'chip-list--compact' : ''] }, [
+        h('div', { class: 'chip-list-label' }, props.label),
+        h('div', { class: 'chips' }, props.rows.map((row) => h('div', { class: 'stat-chip', key: `${row.detail || ''}:${row.name}` }, [
+          h('div', { class: 'stat-chip-label' }, [
+            h('span', { class: 'stat-chip-name' }, row.name),
+            row.detail ? h('span', { class: 'stat-chip-detail' }, row.detail) : null
+          ]),
+          h('div', { class: ['stat-chip-values', props.machineOnly ? 'stat-chip-values--machine-only' : ''] }, [
+            props.machineOnly
+              ? null
+              : h('strong', humanBytesString(Number(row.traffic))),
+            (props.machineOnly || props.showMachines) && row.machine > 0
+              ? h('em', `${formatNumber(row.machine)} ${props.machineLabel}`)
+              : null
+          ])
         ])))
-    ])
+      ])
+    }
   }
 })
 
@@ -201,6 +215,13 @@ function filterPositive (items: ChipRow[], limit = 4): ChipRow[] {
     .slice(0, limit)
 }
 
+function filterMachines (items: ChipRow[], limit = 4): ChipRow[] {
+  return items
+    .filter((item) => item.machine > 0)
+    .sort((a, b) => b.machine - a.machine)
+    .slice(0, limit)
+}
+
 function toolRows (row: TopItem): ChipRow[] {
   return filterPositive(Object.entries(row.byTool || {}).map(([name, value]) => ({
     name,
@@ -211,7 +232,8 @@ function toolRows (row: TopItem): ChipRow[] {
 
 function dimensionRows (items: DimensionValue[], field: 'source' | 'attacker' | 'os'): ChipRow[] {
   return filterPositive((items || []).map((item) => ({
-    name: `${item.tool}: ${String(item[field] || '-')}`,
+    name: String(item[field] || '-'),
+    detail: item.tool,
     traffic: item.traffic,
     machine: item.machine || 0
   })))
@@ -226,7 +248,12 @@ function attackerRows (row: TopItem): ChipRow[] {
 }
 
 function osRows (row: TopItem): ChipRow[] {
-  return dimensionRows(row.byOS, 'os')
+  return filterMachines((row.byOS || []).map((item) => ({
+    name: String(item.os || '-'),
+    detail: item.tool,
+    traffic: item.traffic,
+    machine: item.machine || 0
+  })))
 }
 
 function humanBytesString (bytes: number, dp = 1) {
@@ -266,10 +293,10 @@ function mapUser (item: LeaderboardApiUser): TopItem {
   }
 }
 
-async function loadTop () {
+async function loadTop (force = false) {
   loading.value = true
   try {
-    const data = await window.topAPI.getWeeklyTop()
+    const data = await window.topAPI.getWeeklyTop(force)
     topDay.value = (data.day || []).map(mapUser)
     topWeek.value = (data.week || []).map(mapUser)
     topMonth.value = (data.month || []).map(mapUser)
@@ -332,6 +359,7 @@ onMounted(async () => {
 
 .leader-summary {
   gap: 12px;
+  max-width: 680px;
 }
 
 .leader-summary-card {
@@ -365,6 +393,8 @@ onMounted(async () => {
   border-radius: 8px;
   background: var(--app-panel-bg);
   border: 1px solid var(--app-panel-border);
+  content-visibility: auto;
+  contain-intrinsic-size: 360px;
 }
 
 .top-podium-item {
@@ -373,8 +403,11 @@ onMounted(async () => {
 }
 
 .top-podium-item--rank1 {
-  border-color: color-mix(in srgb, var(--app-accent-warm) 70%, var(--app-panel-border));
-  background: color-mix(in srgb, var(--app-accent-warm) 8%, var(--app-panel-bg));
+  border: 2px solid color-mix(in srgb, var(--app-accent-warm) 82%, var(--app-panel-border));
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--app-accent-warm) 14%, transparent), transparent 42%),
+    var(--app-panel-bg);
+  box-shadow: 0 10px 28px color-mix(in srgb, var(--app-accent-warm) 22%, transparent);
   order: 2;
 }
 
@@ -384,6 +417,28 @@ onMounted(async () => {
 
 .top-podium-item--rank3 {
   order: 3;
+}
+
+.leader-card-head,
+.top-one-badge {
+  display: flex;
+  align-items: center;
+}
+
+.leader-card-head {
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.top-one-badge {
+  gap: 5px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--app-accent-warm) 18%, transparent);
+  color: var(--app-shell-text);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
 }
 
 .rank-pill {
@@ -428,8 +483,7 @@ onMounted(async () => {
 
 .leader-block,
 .rest-details,
-.chip-list,
-.chips {
+.chip-list {
   display: grid;
   gap: 8px;
 }
@@ -442,7 +496,9 @@ onMounted(async () => {
 }
 
 .chips {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
 }
 
 .chip-list--compact .chips {
@@ -451,15 +507,35 @@ onMounted(async () => {
 
 .stat-chip {
   display: grid;
-  gap: 2px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
   min-width: 0;
-  padding: 8px;
+  min-height: 44px;
+  padding: 10px 12px;
   border-radius: 8px;
   background: color-mix(in srgb, var(--app-accent-cool) 9%, transparent);
   border: 1px solid color-mix(in srgb, var(--app-accent-cool) 16%, transparent);
 }
 
+.stat-chip-label,
+.stat-chip-values {
+  display: grid;
+  min-width: 0;
+}
+
+.stat-chip-label {
+  gap: 2px;
+}
+
+.stat-chip-values {
+  justify-items: end;
+  text-align: right;
+  gap: 2px;
+}
+
 .stat-chip-name,
+.stat-chip-detail,
 .stat-chip strong,
 .stat-chip em {
   min-width: 0;
@@ -468,18 +544,110 @@ onMounted(async () => {
   white-space: nowrap;
 }
 
-.stat-chip strong {
-  font-size: 12px;
+.stat-chip-name {
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--app-shell-text);
 }
 
+.stat-chip strong {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--app-accent-warm);
+}
+
+.stat-chip-detail,
 .stat-chip em {
   font-style: normal;
   font-size: 11px;
+  color: var(--app-muted-text);
 }
 
 .chip-empty {
   color: var(--app-muted-text);
   font-size: 12px;
+}
+
+:deep(.chip-list) {
+  display: grid;
+  gap: 8px;
+}
+
+:deep(.chip-list-label) {
+  color: var(--app-muted-text);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+:deep(.chips) {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+:deep(.stat-chip) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  min-height: 44px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--app-accent-cool) 9%, transparent);
+  border: 1px solid color-mix(in srgb, var(--app-accent-cool) 16%, transparent);
+}
+
+:deep(.stat-chip-label),
+:deep(.stat-chip-values) {
+  display: grid;
+  min-width: 0;
+}
+
+:deep(.stat-chip-label) {
+  gap: 2px;
+}
+
+:deep(.stat-chip-values) {
+  justify-items: end;
+  text-align: right;
+  gap: 2px;
+}
+
+:deep(.stat-chip-name),
+:deep(.stat-chip-detail),
+:deep(.stat-chip strong),
+:deep(.stat-chip em) {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+:deep(.stat-chip-name) {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--app-shell-text);
+}
+
+:deep(.stat-chip strong) {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--app-accent-warm);
+}
+
+:deep(.stat-chip-detail),
+:deep(.stat-chip em) {
+  font-size: 11px;
+  font-style: normal;
+  color: var(--app-muted-text);
+}
+
+:deep(.stat-chip-values--machine-only em) {
+  color: var(--app-accent-warm);
+  font-size: 14px;
+  font-weight: 800;
 }
 
 .top-rest-list {

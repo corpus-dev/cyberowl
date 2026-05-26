@@ -96,20 +96,21 @@ export default {
   },
   top: {
     volunteers: 'TO\u041f \u0412\u041e\u041b\u041e\u041d\u0422\u0415\u0420\u0406\u0412',
-    subtitle: 'Живий leaderboard з Corpus statistics API',
+    subtitle: 'Лідери трафіку за період',
     day: '\u0417\u0430 \u0434\u0435\u043d\u044c',
     week: '\u0417\u0430 \u0442\u0438\u0436\u0434\u0435\u043d\u044c',
     month: '\u0417\u0430 \u043c\u0456\u0441\u044f\u0446\u044c',
-    total: '\u0417\u0430 \u0443\u0432\u0456\u0447\u044c',
+    total: 'За всю історію',
     refresh: 'Оновити',
     currentPeriod: 'Період',
     totalTraffic: 'Трафік топ 5',
-    visibleUsers: 'Користувачі',
+    visibleUsers: 'Записи',
     machines: 'машин',
     tools: 'Tools',
     sources: 'Source',
     attackers: 'Attacker',
     os: 'OS',
+    leader: 'Лідер',
     achievements: {
       peopleAreLikeShips: {
         title: '\u041b\u044e\u0434\u0438 \u044f\u043a \u043a\u043e\u0440\u0430\u0431\u043b\u0456',
@@ -208,7 +209,7 @@ export default {
     hideTray: '\u0421\u0445\u043e\u0432\u0430\u0442\u0438 \u043f\u0440\u043e\u0433\u0440\u0430\u043c\u0443 \u0432 \u0442\u0440\u0435\u0439',
     hideTrayDescription: '\u041f\u0440\u0438\u0445\u043e\u0432\u0443\u0432\u0430\u0442\u0438 \u043f\u0440\u043e\u0433\u0440\u0430\u043c\u0443 \u0432 \u0442\u0440\u0435\u0439, \u0430 \u043d\u0435 \u0437\u0430\u043a\u0440\u0438\u0432\u0430\u0442\u0438 \u0457\u0457. \u0422\u0430\u043a\u043e\u0436 \u043f\u0456\u0434 \u0447\u0430\u0441 \u0437\u0430\u043f\u0443\u0441\u043a\u0443 \u043d\u0435 \u043f\u043e\u043a\u0430\u0437\u0443\u0432\u0430\u0442\u0438 \u0433\u043e\u043b\u043e\u0432\u043d\u0435 \u0432\u0456\u043a\u043d\u043e.',
     language: '\u041c\u043e\u0432\u0430',
-    idDescription: '\u0414\u0435 \u0432\u0437\u044f\u0442\u0438 ID ? \u0417\u0430\u0433\u043b\u044f\u043d\u044c\u0442\u0435 \u0434\u043e',
+    idDescription: 'Де взяти Corpus ID? Перейдіть до',
     data: '\u0421\u0445\u043e\u0432\u0438\u0449\u0435',
     dataDescription: '\u041d\u0430\u0440\u0430\u0437\u0456 \u0432\u0430\u0448\u0456 \u043c\u043e\u0434\u0443\u043b\u0456 \u0437\u043d\u0430\u0445\u043e\u0434\u044f\u0442\u044c\u0441\u044f \u0432 \u043f\u0430\u043f\u0446\u0456:',
     warnDelStatistics: '\u0412\u0438 \u0441\u043f\u0440\u0430\u0432\u0434\u0456 \u0445\u043e\u0447\u0435\u0442\u0435 \u0432\u0438\u0434\u0430\u043b\u0438\u0442\u0438 \u0432\u0441\u044e \u0441\u0442\u0430\u0442\u0438\u0441\u0442\u0438\u043a\u0443?',
@@ -267,7 +268,7 @@ export default {
         h6: '6 \u0433\u043e\u0434'
       }
     },
-    corpusAPIKeyEmpty: 'Ви не вказали Corpus ID. Це не критично, але необхідно для відображення загальної статистики. Ви можете вказати його в налаштуваннях.'
+    corpusAPIKeyEmpty: 'Ви не вказали Corpus API Key. Це не критично, але необхідно для відображення загальної статистики. Ви можете вказати його в налаштуваннях.'
   },
 
   developers: {
@@ -286,17 +287,17 @@ export default {
   },
   personalStats: {
     title: '\u0421\u0442\u0430\u0442\u0438\u0441\u0442\u0438\u043a\u0430 \u043a\u043e\u0440\u0438\u0441\u0442\u0443\u0432\u0430\u0447\u0430',
-    updatedFromApi: 'Трафік, tools, source, attacker, OS і machines з Corpus statistics API',
-    apiKeyLabel: 'API Key',
+    updatedFromApi: 'Розподіл трафіку за tools, source, attacker та OS',
+    apiKeyLabel: 'Corpus API Key',
     loadBtn: '\u0417\u0430\u0432\u0430\u043d\u0442\u0430\u0436\u0438\u0442\u0438',
     refresh: 'Оновити',
     overall: '\u0417\u0430\u0433\u0430\u043b\u044c\u043d\u0430 \u0456\u043d\u0444\u043e\u0440\u043c\u0430\u0446\u0456\u044f',
     login: '\u041b\u043e\u0433\u0456\u043d',
     totalTraffic: '\u0417\u0430\u0433\u0430\u043b\u044c\u043d\u0438\u0439 \u0442\u0440\u0430\u0444\u0456\u043a',
-    allTime: 'За весь час',
+    allTime: 'За всю історію',
     machine: 'Machines',
     machineShort: 'машин',
-    uniqueMachines: 'Унікальні client_id',
+    uniqueMachines: 'Активні машини',
     createdDate: '\u0414\u0430\u0442\u0430 \u0440\u0435\u0454\u0441\u0442\u0440\u0430\u0446\u0456\u0457',
     byTool: '\u0417\u0430 \u043c\u043e\u0434\u0443\u043b\u044f\u043c\u0438',
     bySource: '\u0417\u0430 \u0434\u0436\u0435\u0440\u0435\u043b\u0430\u043c\u0438',

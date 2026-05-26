@@ -1,7 +1,7 @@
 import { UserStats, getUserStats, GetUserStatsResponse, getUserTraffic, getUserTrafficDay, getUserTrafficWeek, getUserTrafficMonth, TrafficStats, RawTrafficData, TransformedTrafficStatsResponse } from './api'
 
 const USERSTATS_CACHE_UPDATE_INTERVAL = 1000 * 60 * 2 // 2 minutes
-const TRAFFIC_CACHE_UPDATE_INTERVAL = 1000 * 60 * 10 // 10 minutes
+const TRAFFIC_CACHE_UPDATE_INTERVAL = 1000 * 60 * 2 // 2 minutes
 type PeriodTrafficStats = TrafficStats['periods']['day'] & TrafficStats['periods']['week'] & TrafficStats['periods']['month']
 
 export class CorpusClient {
@@ -32,6 +32,27 @@ export class CorpusClient {
       }
     }
 
+    const trafficResponse = await getUserTraffic({ apiKey })
+
+    if (trafficResponse.success && trafficResponse.data) {
+      const mappedStats: UserStats = {
+        login: trafficResponse.data.login,
+        totalTraffic: Number(trafficResponse.data.totalTraffic || 0),
+        createdDate: new Date(trafficResponse.data.createdDate)
+      }
+
+      this.userStatsCache = mappedStats
+      this.userStatsCacheTimestamp = new Date()
+      this.userStatsCacheAPIKeyUsed = apiKey
+
+      return {
+        success: true,
+        error: '',
+        errorType: 'OK',
+        data: mappedStats
+      }
+    }
+
     const response = await getUserStats({ apiKey })
 
     if (response.success) {
@@ -43,7 +64,7 @@ export class CorpusClient {
     return response
   }
 
-  async getUserTraffic (apiKey: string): Promise<TransformedTrafficStatsResponse> {
+  async getUserTraffic (apiKey: string, force = false): Promise<TransformedTrafficStatsResponse> {
     if (apiKey === '') {
       return {
         success: false,
@@ -53,7 +74,7 @@ export class CorpusClient {
       }
     }
 
-    if (this.trafficStatsCache && this.trafficStatsCacheTimestamp && apiKey === this.trafficStatsCacheAPIKeyUsed && (Date.now() - this.trafficStatsCacheTimestamp.getTime()) < TRAFFIC_CACHE_UPDATE_INTERVAL) {
+    if (!force && this.trafficStatsCache && this.trafficStatsCacheTimestamp && apiKey === this.trafficStatsCacheAPIKeyUsed && (Date.now() - this.trafficStatsCacheTimestamp.getTime()) < TRAFFIC_CACHE_UPDATE_INTERVAL) {
       return {
         success: true,
         error: '',

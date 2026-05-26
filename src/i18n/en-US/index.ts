@@ -96,7 +96,7 @@ export default {
   },
   top: {
     volunteers: 'TOP VOLUNTEERS',
-    subtitle: 'Live leaderboard from Corpus statistics API',
+    subtitle: 'Traffic leaders by period',
     day: 'Per Day',
     week: 'Per Week',
     month: 'Per Month',
@@ -104,12 +104,13 @@ export default {
     refresh: 'Refresh',
     currentPeriod: 'Period',
     totalTraffic: 'Top 5 traffic',
-    visibleUsers: 'Users',
+    visibleUsers: 'Entries',
     machines: 'machines',
     tools: 'Tools',
     sources: 'Sources',
     attackers: 'Attackers',
     os: 'OS',
+    leader: 'Leader',
     achievements: {
       peopleAreLikeShips: {
         title: 'People are like Ships',
@@ -209,7 +210,7 @@ export default {
     hideTray: 'Hide App in Tray',
     hideTrayDescription: 'Hide the app in the tray, not close it. Also, do not show the main window during startup.',
     language: 'Language',
-    idDescription: 'How to get ID? See ',
+    idDescription: 'How to get Corpus ID? See ',
     data: 'Storage',
     dataDescription: 'Currently your modules are located in the folder:',
     warnDelStatistics: 'Are you sure you want to delete the statistics?',
@@ -268,7 +269,7 @@ export default {
         h6: '6h'
       }
     },
-    corpusAPIKeyEmpty: 'Corpus ID is not specified. It is not critical, but it is necessary for displaying general statistics. You can specify it in the settings.'
+    corpusAPIKeyEmpty: 'Corpus API Key is not specified. It is not critical, but it is necessary for displaying general statistics. You can specify it in the settings.'
   },
 
   developers: {
@@ -287,8 +288,8 @@ export default {
   },
   personalStats: {
     title: 'User Statistics',
-    updatedFromApi: 'Traffic, tools, sources, attackers, OS and machines from Corpus statistics API',
-    apiKeyLabel: 'API Key',
+    updatedFromApi: 'Traffic breakdown by tools, sources, attackers and OS',
+    apiKeyLabel: 'Corpus API Key',
     loadBtn: 'Load',
     refresh: 'Refresh',
     overall: 'Overall Information',
@@ -297,7 +298,7 @@ export default {
     allTime: 'All time',
     machine: 'Machines',
     machineShort: 'machines',
-    uniqueMachines: 'Unique client_id values',
+    uniqueMachines: 'Active machines',
     createdDate: 'Registration Date',
     byTool: 'By Module',
     bySource: 'By Source',

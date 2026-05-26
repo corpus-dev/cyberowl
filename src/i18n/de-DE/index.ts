@@ -96,7 +96,7 @@ export default {
   },
   top: {
     volunteers: 'TOP FREIWILLIGE',
-    subtitle: 'Live-Leaderboard aus der Corpus statistics API',
+    subtitle: 'Datenverkehr nach Zeitraum',
     day: 'Pro Tag',
     week: 'Pro Woche',
     month: 'Pro Monat',
@@ -104,12 +104,13 @@ export default {
     refresh: 'Aktualisieren',
     currentPeriod: 'Zeitraum',
     totalTraffic: 'Top-5-Datenverkehr',
-    visibleUsers: 'Benutzer',
+    visibleUsers: 'Eintr\u00e4ge',
     machines: 'Maschinen',
     tools: 'Tools',
     sources: 'Quellen',
     attackers: 'Angreifer',
     os: 'Betriebssystem',
+    leader: 'Spitze',
     achievements: {
       peopleAreLikeShips: {
         title: 'Menschen sind wie Schiffe',
@@ -207,7 +208,7 @@ export default {
     hideTray: 'Anwendung im Infobereich verstecken',
     hideTrayDescription: 'Die App im Infobereich verstecken, aber nicht schlie\u00dfen. Das Hauptfenster beim Start nicht anzeigen.',
     language: 'Sprache',
-    idDescription: 'Wie kann man ID bekommen? Schauen Sie nach',
+    idDescription: 'Wie bekommt man Corpus ID? Siehe',
     data: 'Speicher',
     dataDescription: 'Derzeit sind Ihre Module im Ordner:',
     warnDelStatistics: 'Sind Sie sicher, dass Sie alle Statistiken l\u00f6schen m\u00f6chten?',
@@ -265,7 +266,7 @@ export default {
         h6: '6 Std'
       }
     },
-    corpusAPIKeyEmpty: 'Corpus ID ist nicht angegeben. Es ist nicht kritisch, aber es ist erforderlich, um allgemeine Statistiken anzuzeigen. Sie k\u00f6nnen sie in den Einstellungen angeben.'
+    corpusAPIKeyEmpty: 'Corpus API Key ist nicht angegeben. Es ist nicht kritisch, aber er ist erforderlich, um allgemeine Statistiken anzuzeigen. Sie k\u00f6nnen ihn in den Einstellungen angeben.'
   },
 
   developers: {
@@ -284,8 +285,8 @@ export default {
   },
   personalStats: {
     title: 'Benutzerstatistik',
-    updatedFromApi: 'Datenverkehr, Tools, Quellen, Angreifer, Betriebssysteme und Maschinen aus der Corpus statistics API',
-    apiKeyLabel: 'API-Key',
+    updatedFromApi: 'Datenverkehr nach Tools, Quellen, Angreifern und Betriebssystem',
+    apiKeyLabel: 'Corpus API Key',
     loadBtn: ' Laden',
     refresh: 'Aktualisieren',
     overall: 'Gesamtinformation',
@@ -294,7 +295,7 @@ export default {
     allTime: 'Gesamt',
     machine: 'Maschinen',
     machineShort: 'Maschinen',
-    uniqueMachines: 'Eindeutige client_id Werte',
+    uniqueMachines: 'Aktive Maschinen',
     createdDate: 'Registrierungsdatum',
     byTool: 'Nach Modul',
     bySource: 'Nach Quelle',

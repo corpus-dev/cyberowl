@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   {{ userName + " | " + selectedModule }} |
   <span
     :class="
@@ -93,4 +93,3 @@ onUnmounted(() => {
   window.executionEngineAPI.stopListeningForStatistics(onStatisticsUpdate)
 })
 </script>
-

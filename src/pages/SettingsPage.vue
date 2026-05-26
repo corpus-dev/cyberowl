@@ -131,10 +131,10 @@
         <span
           >{{ $t("settings.idDescription") }}
           <a
-            href="https://github.com/corpus-dev/cyberowl/blob/main/statistics.md"
+            href="https://t.me/corps_statistics_bot"
             target="_blank"
             rel="noopener noreferrer"
-            >https://github.com/corpus-dev/cyberowl/blob/main/statistics.md</a
+            >https://t.me/corps_statistics_bot</a
           >
         </span>
         <q-separator class="q-mt-xs q-mb-sm" />
@@ -300,19 +300,16 @@
       </q-card-actions>
     </q-card>
   </q-dialog>
-
-
 </template>
 
 <script lang="ts" setup>
 import { useQuasar } from 'quasar'
 import LanguageSelectorComponent from './settings/LanguageSelectorComponent.vue'
 
-import { computed, onMounted, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import { useAppearanceStore } from 'src/appearance/store'
-
 
 const $q = useQuasar()
 const { t } = useI18n()

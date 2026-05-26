@@ -36,7 +36,7 @@
 import { onMounted, ref, watch } from 'vue'
 import { useCorpusStats } from 'src/composables/useCorpusStats'
 
-const configDetails = ref('ID + API KEY')
+const configDetails = ref('Corpus ID + Corpus API Key')
 const name = ref('')
 const uuid = ref('NOT CONFIGURED')
 
@@ -55,11 +55,11 @@ async function loadId () {
   }
 
   if (settings.corpus.uuid !== '' && settings.corpus.apiKey !== '') {
-    configDetails.value = 'ID + API KEY'
+    configDetails.value = 'Corpus ID + Corpus API Key'
   } else if (settings.corpus.uuid !== '') {
     configDetails.value = 'ID'
   } else if (settings.corpus.apiKey !== '') {
-    configDetails.value = 'API KEY'
+    configDetails.value = 'Corpus API Key'
   } else {
     configDetails.value = 'NOT CONFIGURED'
   }

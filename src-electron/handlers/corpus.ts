@@ -12,8 +12,8 @@ export function handleCorpus (settings: Settings) {
     return await client.getUserStats(apiKey)
   })
 
-  ipcMain.handle('corpus:getUserTraffic', async (_e, apiKey: string) => {
-    return await client.getUserTraffic(apiKey)
+  ipcMain.handle('corpus:getUserTraffic', async (_e, apiKey: string, force = false) => {
+    return await client.getUserTraffic(apiKey, force)
   })
 
   ipcMain.handle('corpus:getUserTrafficDay', async (_e, apiKey: string) => {

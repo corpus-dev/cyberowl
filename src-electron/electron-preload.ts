@@ -166,8 +166,8 @@ const executionEngineAPI = {
 contextBridge.exposeInMainWorld('executionEngineAPI', executionEngineAPI)
 
 const topAPI = {
-  async getWeeklyTop (): Promise<TopData> {
-    return await invoke<TopData>('top:getWeeklyTop')
+  async getWeeklyTop (force = false): Promise<TopData> {
+    return await invoke<TopData>('top:getWeeklyTop', force)
   }
 }
 contextBridge.exposeInMainWorld('topAPI', topAPI)
@@ -265,8 +265,8 @@ const corpusAPI = {
   async getStats (): Promise<GetCorpusUserStatsResponse> {
     return await invoke<GetCorpusUserStatsResponse>('corpus:getStats')
   },
-  async getUserTraffic (apiKey: string): Promise<TrafficStatsResponse> {
-    return await invoke<TrafficStatsResponse>('corpus:getUserTraffic', apiKey)
+  async getUserTraffic (apiKey: string, force = false): Promise<TrafficStatsResponse> {
+    return await invoke<TrafficStatsResponse>('corpus:getUserTraffic', apiKey, force)
   },
   async getUserTrafficDay (apiKey: string): Promise<TrafficStatsResponse> {
     return await invoke<TrafficStatsResponse>('corpus:getUserTrafficDay', apiKey)

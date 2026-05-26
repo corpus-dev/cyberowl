@@ -31,7 +31,7 @@ export interface TopData {
 
 let leaderboardCache: TopData | null = null
 let leaderboardCacheTime: Date | null = null
-const CACHE_DURATION_MS = 1000 * 60 * 10 // 10 minutes
+const CACHE_DURATION_MS = 1000 * 60 * 2 // 2 minutes
 
 async function fetchLeaderboard (period: string): Promise<LeaderboardUser[]> {
   try {
@@ -62,8 +62,8 @@ async function fetchAllLeaderboards (): Promise<TopData> {
   return { day, week, month, total }
 }
 
-async function getTopData (): Promise<TopData> {
-  if (leaderboardCache !== null && leaderboardCacheTime !== null) {
+async function getTopData (force = false): Promise<TopData> {
+  if (!force && leaderboardCache !== null && leaderboardCacheTime !== null) {
     const now = new Date()
     const diff = now.getTime() - leaderboardCacheTime.getTime()
     if (diff < CACHE_DURATION_MS) {
@@ -78,7 +78,7 @@ async function getTopData (): Promise<TopData> {
 }
 
 export function handleTop () {
-  ipcMain.handle('top:getWeeklyTop', async () => {
-    return await getTopData()
+  ipcMain.handle('top:getWeeklyTop', async (_event, force = false) => {
+    return await getTopData(force)
   })
 }
