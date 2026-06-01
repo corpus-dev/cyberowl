@@ -123,6 +123,7 @@ export function handleTray (settings: Settings, mainWindow: BrowserWindow) {
 
   const isBootstrapIncomplete = settingsData.bootstrap.step !== 'DONE'
   if (!isBootstrapIncomplete && settingsData.system.hideInTray) {
+    mainWindow.showInactive()
     mainWindow.hide()
   } else {
     mainWindow.show()

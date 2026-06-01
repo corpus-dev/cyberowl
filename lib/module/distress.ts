@@ -144,6 +144,7 @@ export class Distress extends Module<Config> {
 
     // Process statistics
     let statisticsBuffer = ''
+    let lastStatisticsEvent: Date | null = null
     handler.stdout.on('data', (data: Buffer) => {
       statisticsBuffer += data.toString()
 
@@ -169,17 +170,33 @@ export class Distress extends Module<Config> {
             continue
           }
 
-          const bytesSend = convertTrafficValueToBytes(metrics.get('bytes') ?? '')
-          const currentSendBitrate = convertTrafficValueToBytes(metrics.get('bps') ?? '')
-          if (bytesSend < 0 || currentSendBitrate < 0) {
+          const currentSendBitrate = convertTrafficValueToBytes(metrics.get('bps') ?? '', true)
+          if (currentSendBitrate <= 0) {
             continue
           }
 
+          let bytesSend = 0
+          if (lastStatisticsEvent != null) {
+            const now = new Date()
+            const timeDiff = (now.getTime() - lastStatisticsEvent.getTime()) / 1000.0
+            if (timeDiff > 60) {
+              lastStatisticsEvent = now
+              continue
+            }
+            if (timeDiff > 0) {
+              bytesSend = currentSendBitrate * timeDiff
+            }
+          }
+          lastStatisticsEvent = new Date()
+
+          const conn = Number(metrics.get('active connections') ?? '')
+
           this.emit('execution:statistics', {
             type: 'execution:statistics',
-            bytesSend: Number(bytesSend),
+            bytesSend,
             currentSendBitrate,
-            timestamp: new Date().getTime()
+            timestamp: new Date().getTime(),
+            activeConnections: Number.isFinite(conn) ? conn : undefined
           })
         } catch (e) {
           this.invalidJsonLineCount++

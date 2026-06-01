@@ -8,6 +8,7 @@ import { fileURLToPath } from 'url'
 
 import { handle } from './handlers'
 import { writeStabilityLog } from 'app/lib/utils/stabilityLog'
+import { getSavedWindowBounds, persistWindowBounds } from './windowBounds'
 
 const platform = process.platform || os.platform()
 
@@ -199,6 +200,20 @@ async function checkWindowsRuntimePrerequisite () {
   })
 }
 
+let restoredBounds: { x?: number; y?: number; width: number; height: number } = { width: 1400, height: 660 }
+let boundsSaveTimer: ReturnType<typeof setTimeout> | null = null
+
+function scheduleBoundsSave (win: BrowserWindow) {
+  if (boundsSaveTimer) clearTimeout(boundsSaveTimer)
+  boundsSaveTimer = setTimeout(() => {
+    void persistWindowBounds(
+      restoredBounds,
+      () => win.isMaximized(),
+      () => win.getBounds()
+    )
+  }, 500)
+}
+
 function createWindow () {
   if (mainWindow && !mainWindow.isDestroyed()) {
     return
@@ -230,10 +245,12 @@ function createWindow () {
     })
   }
 
+  const saved = getSavedWindowBounds()
+  restoredBounds = saved.bounds
+
   const createdWindow = new BrowserWindow({
     icon: appIcon,
-    width: 1400,
-    height: 660,
+    ...saved.bounds,
     useContentSize: true,
     autoHideMenuBar: true,
     webPreferences: {
@@ -356,6 +373,32 @@ function createWindow () {
     logMainProcessEvent('warn', 'renderer-unresponsive')
     void captureRendererDiagnostics(createdWindow, 'unresponsive', 'warn')
   })
+
+  createdWindow.on('resize', () => {
+    if (!createdWindow.isMaximized() && !createdWindow.isDestroyed()) {
+      restoredBounds = createdWindow.getBounds()
+    }
+    scheduleBoundsSave(createdWindow)
+  })
+
+  createdWindow.on('move', () => {
+    if (!createdWindow.isMaximized() && !createdWindow.isDestroyed()) {
+      restoredBounds = createdWindow.getBounds()
+    }
+    scheduleBoundsSave(createdWindow)
+  })
+
+  createdWindow.on('maximize', () => {
+    scheduleBoundsSave(createdWindow)
+  })
+
+  createdWindow.on('unmaximize', () => {
+    scheduleBoundsSave(createdWindow)
+  })
+
+  if (saved.maximized) {
+    createdWindow.maximize()
+  }
 
   handle(createdWindow)
 }

@@ -8,7 +8,7 @@
           round
           color="primary"
           icon="menu"
-          aria-label="Menu"
+          :aria-label="$t('layout.menuAria')"
           @click="toggleLeftDrawer"
         />
 

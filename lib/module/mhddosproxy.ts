@@ -331,7 +331,7 @@ export class MHDDOSProxy extends Module<Config> {
             continue
           }
 
-          const currentSendBitrate = convertTrafficValueToBytes(msg)
+          const currentSendBitrate = convertTrafficValueToBytes(msg, true)
           if (currentSendBitrate <= 0) {
             continue
           }
@@ -350,11 +350,17 @@ export class MHDDOSProxy extends Module<Config> {
           }
           lastStatisticsEvent = new Date()
 
+          const connectionsLabel = lang === 'ua' ? REQUIRED_METRIC_LABELS.ua[1]
+            : lang === 'de' ? REQUIRED_METRIC_LABELS.de[1]
+              : REQUIRED_METRIC_LABELS.en[1]
+          const conn = Number(metrics.get(connectionsLabel) ?? '')
+
           this.emit('execution:statistics', {
             type: 'execution:statistics',
             bytesSend,
             currentSendBitrate,
-            timestamp: new Date().getTime()
+            timestamp: new Date().getTime(),
+            activeConnections: Number.isFinite(conn) ? conn : undefined
           })
         } catch (e) {
           console.error(String(e) + '\n' + line)

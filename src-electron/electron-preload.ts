@@ -250,6 +250,11 @@ const settingsAPI = {
     async setUnlockedModes (data: SettingsData['gui']['unlockedModes']): Promise<void> {
       await invoke<void>('settings:gui:unlockedModes', data)
     }
+  },
+  window: {
+    async setBounds (data: SettingsData['window']): Promise<void> {
+      await invoke<void>('settings:window:bounds', data)
+    }
   }
 }
 contextBridge.exposeInMainWorld('settingsAPI', settingsAPI)

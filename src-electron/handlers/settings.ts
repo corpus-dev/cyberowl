@@ -45,7 +45,14 @@ export interface SettingsData {
   modules: {
     dataPath: string
   }
-  execution: Record<string, unknown>
+  execution: Record<string, unknown>,
+  window: {
+    x: number | undefined
+    y: number | undefined
+    width: number
+    height: number
+    maximized: boolean
+  }
 }
 
 type SettingsChangedEventHandler = (data: SettingsData) => void
@@ -100,7 +107,14 @@ export class Settings extends EventEmitter {
       modules: {
         dataPath: joinPath(Settings.profileDir, 'modules')
       },
-      execution: {}
+      execution: {},
+      window: {
+        x: undefined,
+        y: undefined,
+        width: 1400,
+        height: 660,
+        maximized: false
+      }
     }
   }
 
@@ -297,6 +311,16 @@ export class Settings extends EventEmitter {
     if (this.data.execution === undefined) {
       this.data.execution = {}
     }
+
+    if (this.data.window === undefined) {
+      this.data.window = {
+        x: undefined,
+        y: undefined,
+        width: 1400,
+        height: 660,
+        maximized: false
+      }
+    }
   }
 
   async load () {
@@ -459,6 +483,15 @@ export class Settings extends EventEmitter {
     this.data.corpus.apiKey = data
     await this.save()
     this.settingsChangedEmiter.emit('settingsChanged', this.data)
+  }
+
+  async setWindowBounds (data: SettingsData['window']) {
+    if (!this.loaded) {
+      await this.load()
+    }
+
+    this.data.window = data
+    await this.save()
   }
 
   async setBootstrapStep (data: SettingsData['bootstrap']['step']) {
@@ -686,5 +719,9 @@ export function handleSettings (settings: Settings, executionEngine: ExecutionEn
 
   ipcMain.handle('settings:schedule:intervals', async (_e, data: SettingsData['schedule']['intervals']) => {
     await settings.setScheduleIntervals(data)
+  })
+
+  ipcMain.handle('settings:window:bounds', async (_e, data: SettingsData['window']) => {
+    await settings.setWindowBounds(data)
   })
 }

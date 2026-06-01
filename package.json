@@ -1,6 +1,6 @@
 {
   "name": "cyberowl",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "CyberOwl",
   "productName": "CyberOwl",
   "author": {
@@ -56,6 +56,7 @@
     "ts-essentials": "^10.1.1",
     "typescript": "^5.8.2",
     "vite": "^2.9.18",
+    "vitest": "^4.1.8",
     "vuex": "^4.1.0",
     "workbox-build": "^7.4.0"
   },

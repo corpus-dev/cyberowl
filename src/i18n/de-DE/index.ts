@@ -10,7 +10,12 @@ export default {
     top: 'Bestenliste',
     developers: 'Entwickler',
     personal_stats: 'Benutzerstatistik',
-    appName: 'Cyber Owl'
+    appName: 'Cyber Owl',
+    runTime: 'Laufzeit',
+    menuAria: 'Menü',
+    running: 'AKTIV',
+    idle: 'INAKTIV',
+    error: 'FEHLER'
   },
   schedule: {
     title: 'Planung',
@@ -229,10 +234,16 @@ export default {
   },
 
   dashboard: {
-    statistics: 'Angriffskraft-Statistiken',
-    bytes: 'Gesendet / Datenverkehr / Insgesamt',
-    bytesHint: 'Die Statistiken zum gesendeten Datenverkehr k\u00f6nnen ungenau sein. Dies h\u00e4ngt vom Modul und seiner Funktionsweise ab. Die Gesamtstatistik ist immer pr\u00e4zise und zeigt aggregierte Informationen aus allen laufenden Tools an.',
+    statistics: 'Angriffsgeschwindigkeit',
+    bytes: 'Traffic',
+    bytesSentLabel: 'ca. gesendet',
+    bytesSpeedLabel: 'geschwindigkeit',
+    bytesCreditedLabel: 'gutgeschrieben',
+    bytesHint: 'Die Statistiken zum gesendeten Datenverkehr k\u00f6nnen f\u00fcr einige Module aufgrund der eingeschr\u00e4nkten Kompatibilit\u00e4t mit Cyber Owl ungenau sein. Die gutgeschriebene Statistik ist immer genau, erfordert jedoch eine konfigurierte Corpus-ID. Sie zeigt Daten aller Ihrer verbundenen Tools an.',
     moduleStatus: 'Modul-Status',
+    connections: 'Verbindungen',
+    active: 'Aktiv',
+    pending: 'Ausstehend',
     control: 'Systemsteuerung',
     autostart: 'Autostart',
     scheduler: 'Scheduler',

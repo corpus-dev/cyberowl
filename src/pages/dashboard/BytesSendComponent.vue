@@ -12,64 +12,60 @@
           ></q-icon
         >
       </div>
-      <div class="text-subtitle1 text-bold">
-        {{ humanBytesString(totalBytesSend) }} | {{ humanBytesString(bps) }}/s |
-        {{
-          totalStatisticsAvailable
-            ? `${humanBytesString(totalBytesSendFromAllTools)}`
-            : ""
-        }}
+      <div class="row q-mt-xs" style="gap: 6px;">
+        <div class="col metric-card">
+          <div class="metric-label">{{ $t("dashboard.bytesSentLabel") }}</div>
+          <div class="metric-value">{{ humanBytesString(totalBytesSend, 1, locale) }}</div>
+        </div>
+        <div class="col metric-card">
+          <div class="metric-label">{{ $t("dashboard.bytesSpeedLabel") }}</div>
+          <div class="metric-value">{{ humanBitsString(bps * 8, 1, locale) }}</div>
+        </div>
+        <div class="col metric-card" v-if="totalStatisticsAvailable">
+          <div class="metric-label">{{ $t("dashboard.bytesCreditedLabel") }}</div>
+          <div class="metric-value">{{ humanBytesString(totalBytesSendFromAllTools, 1, locale) }}</div>
+        </div>
       </div>
     </div>
   </q-card>
 </template>
 
 <script lang="ts" setup>
+import { humanBytesString, humanBitsString, isSameDay } from 'app/lib/utils/trafficUnits'
 import {
   ModuleExecutionStatisticsEventData
 } from 'app/lib/module/module'
 import { IpcRendererEvent } from 'electron'
 import { onMounted, onUnmounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useCorpusStats } from 'src/composables/useCorpusStats'
+
+const { locale } = useI18n()
 
 const totalBytesSend = ref(0)
 const bps = ref(0)
-
-function humanBytesString (bytes: number, dp = 1) {
-  const thresh = 1024 // 1024 instead of 1000 to be consistent with other places
-
-  if (Math.abs(bytes) < thresh) {
-    return bytes + ' B'
-  }
-
-  const units = ['kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
-  let u = -1
-  const r = 10 ** dp
-
-  do {
-    bytes /= thresh
-    ++u
-  } while (
-    Math.round(Math.abs(bytes) * r) / r >= thresh &&
-    u < units.length - 1
-  )
-
-  return bytes.toFixed(dp) + ' ' + units[u]
-}
+let lastEventTimestamp = 0
 
 function onStatisticsUpdate (
   _e: IpcRendererEvent,
   data: ModuleExecutionStatisticsEventData
 ) {
+  if (lastEventTimestamp && !isSameDay(lastEventTimestamp, data.timestamp)) {
+    totalBytesSend.value = 0
+  }
+  lastEventTimestamp = data.timestamp
   totalBytesSend.value += data.bytesSend
   bps.value = data.currentSendBitrate
 }
 
 async function loadLastStatistics () {
   const state = await window.executionEngineAPI.getState()
-  totalBytesSend.value = state.statisticsTotals.totalBytesSent
   if (state.statistics.length > 0) {
     const lastStatistics = state.statistics[state.statistics.length - 1]
+    lastEventTimestamp = lastStatistics.timestamp
+    if (isSameDay(lastEventTimestamp, Date.now())) {
+      totalBytesSend.value = state.statisticsTotals.totalBytesSent
+    }
     bps.value = lastStatistics.currentSendBitrate
   }
 }
@@ -89,3 +85,24 @@ onUnmounted(() => {
 })
 </script>
 
+<style scoped>
+.metric-card {
+  border: 1px solid var(--app-soft-border);
+  border-radius: 8px;
+  padding: 5px 9px;
+  min-width: 80px;
+  background: var(--app-soft-surface);
+}
+
+.metric-label {
+  font-size: 11px;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  color: var(--app-muted-text);
+}
+
+.metric-value {
+  font-size: 14px;
+  font-weight: 700;
+}
+</style>

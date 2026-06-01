@@ -47,7 +47,7 @@
         <q-card flat bordered class="stat-card metric-card">
           <q-card-section>
             <div class="stat-kicker">{{ $t('personalStats.totalTraffic') }}</div>
-            <div class="stat-main stat-main--traffic">{{ humanBytesString(Number(stats.totalTraffic)) }}</div>
+            <div class="stat-main stat-main--traffic">{{ humanBytesString(Number(stats.totalTraffic), 1, locale) }}</div>
             <div class="stat-sub">{{ $t('personalStats.allTime') }}</div>
           </q-card-section>
         </q-card>
@@ -76,7 +76,7 @@
                 <q-icon :name="period.icon" size="20px" />
                 <span>{{ period.label }}</span>
               </div>
-              <div class="period-traffic">{{ humanBytesString(Number(period.data.traffic)) }}</div>
+              <div class="period-traffic">{{ humanBytesString(Number(period.data.traffic), 1, locale) }}</div>
               <div class="period-meta">
                 <span>{{ period.periodKey }}</span>
                 <span v-if="period.data.machine > 0">{{ formatNumber(period.data.machine) }} {{ $t('personalStats.machineShort') }}</span>
@@ -222,7 +222,7 @@ const StatList = defineComponent({
             row.detail ? h('span', row.detail) : null
           ]),
           h('div', { class: ['stat-row-values', props.machineOnly ? 'stat-row-values--machine-only' : ''] }, [
-            props.machineOnly ? null : h('strong', humanBytesString(Number(row.traffic))),
+            props.machineOnly ? null : h('strong', humanBytesString(Number(row.traffic), 1, locale.value)),
             row.machine > 0 ? h('span', `${formatNumber(row.machine)} ${t('personalStats.machineShort')}`) : null
           ])
         ])))
@@ -246,7 +246,7 @@ const PeriodBreakdownList = defineComponent({
             h('span', row.name),
             row.detail ? h('em', row.detail) : null
           ]),
-          h('strong', humanBytesString(Number(row.traffic)))
+          h('strong', humanBytesString(Number(row.traffic), 1, locale.value))
         ])))
       ])
     }
@@ -257,7 +257,7 @@ const apiKey = ref('')
 const loading = ref(false)
 const error = ref('')
 const stats = ref<TrafficStats | null>(null)
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 const displayLogin = computed(() => stats.value?.login || '---')
 
@@ -286,17 +286,17 @@ const totalChartOptions = computed(() => ({
             show: true,
             label: 'Total',
             color: 'var(--app-muted-text)',
-            formatter: () => humanBytesString(Number(stats.value?.totalTraffic || 0))
+            formatter: () => humanBytesString(Number(stats.value?.totalTraffic || 0), 1, locale.value)
           },
           value: {
             color: 'var(--app-shell-text)',
-            formatter: (value: string) => humanBytesString(Number(value))
+            formatter: (value: string) => humanBytesString(Number(value), 1, locale.value)
           }
         }
       }
     }
   },
-  tooltip: { y: { formatter: (value: number) => humanBytesString(value) } }
+  tooltip: { y: { formatter: (value: number) => humanBytesString(value, 1, locale.value) } }
 }))
 
 const periodCards = computed(() => {
@@ -352,11 +352,23 @@ function machineRows (items: DimensionStat[], field: 'source' | 'attacker' | 'os
     .sort((a, b) => b.machine - a.machine)
 }
 
-function humanBytesString (bytes: number, dp = 1): string {
-  if (!Number.isFinite(bytes)) return '0 B'
-  const thresh = 1024
-  if (Math.abs(bytes) < thresh) return `${bytes} B`
-  const units = ['KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
+const BYTE_BASE_UNIT: Record<string, string> = {
+  'en-US': 'B',
+  'ua-UA': '\u0411',
+  'de-DE': 'B'
+}
+
+const BYTE_UNITS: Record<string, string[]> = {
+  'en-US': ['kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'],
+  'ua-UA': ['\u043a\u0411', '\u041c\u0411', '\u0413\u0411', '\u0422\u0411', '\u041f\u0411', '\u0415\u0411', '\u0417\u0411', '\u0419\u0411'],
+  'de-DE': ['kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
+}
+
+function humanBytesString (bytes: number, dp = 1, loc = 'en-US'): string {
+  if (!Number.isFinite(bytes)) return '0 ' + (BYTE_BASE_UNIT[loc] ?? 'B')
+  const thresh = 1000
+  if (Math.abs(bytes) < thresh) return `${bytes} ${BYTE_BASE_UNIT[loc] ?? 'B'}`
+  const units = BYTE_UNITS[loc] ?? BYTE_UNITS['en-US']!
   let u = -1
   const r = 10 ** dp
   do {

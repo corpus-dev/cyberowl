@@ -14,6 +14,7 @@ import {
 } from 'app/lib/module/module'
 import { writeFileAtomicWithBackup } from 'app/lib/utils/atomicFile'
 import { writeStabilityLog } from 'app/lib/utils/stabilityLog'
+import { isSameDay } from 'app/lib/utils/trafficUnits'
 
 export interface ExecutionLogEntry {
   type: 'STARTED' | 'STOPPED' | 'ERROR'
@@ -34,6 +35,7 @@ export interface State {
   stdErr: Array<string>
   statistics: Array<ModuleExecutionStatisticsEventData>
   statisticsTotals: StatisticsTotals
+  appStartTime: number
 }
 
 function createDefaultState (): State {
@@ -43,7 +45,8 @@ function createDefaultState (): State {
     statistics: [],
     stdErr: [],
     stdOut: [],
-    statisticsTotals: { totalBytesSent: 0 }
+    statisticsTotals: { totalBytesSent: 0 },
+    appStartTime: Date.now()
   }
 }
 
@@ -177,6 +180,12 @@ export class ExecutionEngine {
   private async appendToStatistics (data: ModuleExecutionStatisticsEventData) {
     await this.stateLock.runExclusive(async () => {
       const state = await this.getState()
+      if (state.statistics.length > 0) {
+        const lastStat = state.statistics[state.statistics.length - 1]
+        if (!isSameDay(lastStat.timestamp, data.timestamp)) {
+          state.statisticsTotals.totalBytesSent = 0
+        }
+      }
       state.statistics.push(data)
       if (state.statistics.length > 100) {
         state.statistics.shift()
@@ -405,6 +414,8 @@ export class ExecutionEngine {
         }
       }
     }
+
+    this.state.appStartTime = Date.now()
 
     if (this.state.statisticsTotals === undefined) {
       this.state.statisticsTotals = { totalBytesSent: 0 }

@@ -54,6 +54,7 @@ export interface ModuleExecutionStatisticsEventData {
   currentSendBitrate: number
   bytesSend: number
   timestamp: number
+  activeConnections?: number
 }
 export interface ModuleExecutionStdoutEventData {
   type: 'execution:stdout';

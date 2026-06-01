@@ -153,8 +153,16 @@
           v-model="corpusAPIKey"
           @update:model-value="setCorpusAPIKey"
           debounce="500"
-          type="password"
-        />
+          :type="showCorpusAPIKey ? 'text' : 'password'"
+        >
+          <template v-slot:append>
+            <q-icon
+              :name="showCorpusAPIKey ? 'visibility_off' : 'visibility'"
+              class="cursor-pointer"
+              @click="showCorpusAPIKey = !showCorpusAPIKey"
+            />
+          </template>
+        </q-input>
       </q-card-section>
 
       <q-card-section>
@@ -354,6 +362,7 @@ async function setCorpusUUID (newValue: string | number | null) {
 }
 
 const corpusAPIKey = ref('')
+const showCorpusAPIKey = ref(false)
 async function setCorpusAPIKey (newValue: string | number | null) {
   await window.settingsAPI.corpus.setAPIKey(String(newValue).replace(/\s/g, ''))
 }

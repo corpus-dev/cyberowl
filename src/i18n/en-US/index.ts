@@ -10,7 +10,12 @@ export default {
     top: 'Leaderboard',
     developers: 'Developers',
     personal_stats: 'User Statistics',
-    appName: 'Cyber Owl'
+    appName: 'Cyber Owl',
+    runTime: 'Run time',
+    menuAria: 'Menu',
+    running: 'RUNNING',
+    idle: 'IDLE',
+    error: 'ERROR'
   },
   schedule: {
     title: 'Scheduling',
@@ -232,10 +237,16 @@ export default {
   },
 
   dashboard: {
-    statistics: 'Attack Power Statistics',
-    bytes: 'Sent / Traffic / Total',
-    bytesHint: 'Statistics of send traffic may be not accurate. It depends on the module and the way it works. Total statistics is always precise and shows aggregated information from all the running tools.',
+    statistics: 'Attack Speed',
+    bytes: 'Traffic',
+    bytesSentLabel: 'approx. sent',
+    bytesSpeedLabel: 'speed',
+    bytesCreditedLabel: 'credited',
+    bytesHint: 'Sent traffic statistics may be inaccurate for some modules due to limited compatibility with Cyber Owl. Credited statistics is always accurate, but requires a configured Corpus ID. It reflects data from all your connected tools.',
     moduleStatus: 'Module Status',
+    connections: 'Connections',
+    active: 'Active',
+    pending: 'Pending',
     control: 'System Control',
     autostart: 'Autostart',
     scheduler: 'Scheduler',

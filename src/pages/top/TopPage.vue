@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <q-page padding class="top-page">
     <div class="top-header q-mb-md">
       <div>
@@ -33,7 +33,7 @@
         <q-card flat bordered class="leader-summary-card">
           <q-card-section>
             <div class="summary-kicker">{{ $t('top.totalTraffic') }}</div>
-            <div class="summary-main">{{ humanBytesString(currentTotalTraffic) }}</div>
+            <div class="summary-main">{{ humanBytesString(currentTotalTraffic, 1, locale) }}</div>
           </q-card-section>
         </q-card>
       </section>
@@ -56,7 +56,7 @@
               </div>
             </div>
             <div class="leader-name">{{ row.login }}</div>
-            <div class="leader-traffic">{{ humanBytesString(Number(row.traffic)) }}</div>
+            <div class="leader-traffic">{{ humanBytesString(Number(row.traffic), 1, locale) }}</div>
             <div v-if="activeTab !== 'total'" class="leader-machines">
               <q-icon name="dns" size="16px" />
               <span>{{ formatNumber(row.machine) }} {{ $t('top.machines') }}</span>
@@ -86,7 +86,7 @@
               <strong>{{ row.login }}</strong>
             </div>
             <div class="rest-metrics">
-              <span>{{ humanBytesString(Number(row.traffic)) }}</span>
+              <span>{{ humanBytesString(Number(row.traffic), 1, locale) }}</span>
               <span v-if="activeTab !== 'total'">{{ formatNumber(row.machine) }} {{ $t('top.machines') }}</span>
             </div>
             <div class="rest-details q-mt-sm">
@@ -176,7 +176,7 @@ const StatChipList = defineComponent({
           h('div', { class: ['stat-chip-values', props.machineOnly ? 'stat-chip-values--machine-only' : ''] }, [
             props.machineOnly
               ? null
-              : h('strong', humanBytesString(Number(row.traffic))),
+              : h('strong', humanBytesString(Number(row.traffic), 1, locale.value)),
             (props.machineOnly || props.showMachines) && row.machine > 0
               ? h('em', `${formatNumber(row.machine)} ${props.machineLabel}`)
               : null
@@ -187,7 +187,7 @@ const StatChipList = defineComponent({
   }
 })
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const activeTab = ref<'day' | 'week' | 'month' | 'total'>('day')
 const loading = ref(false)
 
@@ -256,22 +256,37 @@ function osRows (row: TopItem): ChipRow[] {
   })))
 }
 
-function humanBytesString (bytes: number, dp = 1) {
-  if (!Number.isFinite(bytes)) return '0 B'
-  const thresh = 1024
+const BYTE_BASE_UNIT: Record<string, string> = {
+  'en-US': 'B',
+  'ua-UA': '\u0411',
+  'de-DE': 'B'
+}
+
+const BYTE_UNITS: Record<string, string[]> = {
+  'en-US': ['kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'],
+  'ua-UA': ['\u043a\u0411', '\u041c\u0411', '\u0413\u0411', '\u0422\u0411', '\u041f\u0411', '\u0415\u0411', '\u0417\u0411', '\u0419\u0411'],
+  'de-DE': ['kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
+}
+
+function humanBytesString (bytes: number, dp = 1, loc = 'en-US') {
+  if (!Number.isFinite(bytes)) return '0 ' + (BYTE_BASE_UNIT[loc] ?? 'B')
+  const thresh = 1000
+  const units = BYTE_UNITS[loc] ?? BYTE_UNITS['en-US']!
 
   if (Math.abs(bytes) < thresh) {
-    return `${bytes} B`
+    return `${bytes} ${BYTE_BASE_UNIT[loc] ?? 'B'}`
   }
 
-  const units = ['KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
   let u = -1
   const r = 10 ** dp
 
   do {
     bytes /= thresh
     ++u
-  } while (Math.round(Math.abs(bytes) * r) / r >= thresh && u < units.length - 1)
+  } while (
+    Math.round(Math.abs(bytes) * r) / r >= thresh &&
+    u < units.length - 1
+  )
 
   return `${bytes.toFixed(dp)} ${units[u]}`
 }

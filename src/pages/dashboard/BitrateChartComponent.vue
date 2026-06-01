@@ -5,20 +5,20 @@
         <div class="metric-card">
           <div class="metric-label">{{ $t("dashboard.chart.now") }}</div>
           <div class="metric-value">
-            {{ humanBytesString(summary.now) }}/s
+            {{ humanBitsString(summary.now * 8, 1, locale) }}
             <q-tooltip v-if="isCompact">
-              <div>{{ $t("dashboard.chart.average") }}: {{ humanBytesString(summary.avg) }}/s</div>
-              <div>{{ $t("dashboard.chart.peak") }}: {{ humanBytesString(summary.peak) }}/s</div>
+              <div>{{ $t("dashboard.chart.average") }}: {{ humanBitsString(summary.avg * 8, 1, locale) }}</div>
+              <div>{{ $t("dashboard.chart.peak") }}: {{ humanBitsString(summary.peak * 8, 1, locale) }}</div>
             </q-tooltip>
           </div>
         </div>
         <div class="metric-card" v-if="!isCompact">
           <div class="metric-label">{{ $t("dashboard.chart.average") }}</div>
-          <div class="metric-value">{{ humanBytesString(summary.avg) }}/s</div>
+          <div class="metric-value">{{ humanBitsString(summary.avg * 8, 1, locale) }}</div>
         </div>
         <div class="metric-card" v-if="!isCompact">
           <div class="metric-label">{{ $t("dashboard.chart.peak") }}</div>
-          <div class="metric-value">{{ humanBytesString(summary.peak) }}/s</div>
+          <div class="metric-value">{{ humanBitsString(summary.peak * 8, 1, locale) }}</div>
         </div>
       </div>
 
@@ -67,6 +67,7 @@
 </template>
 
 <script lang="ts" setup>
+import { humanBitsString } from 'app/lib/utils/trafficUnits'
 import { ModuleExecutionStatisticsEventData } from 'app/lib/module/module'
 import { ExecutionLogEntry } from 'app/src-electron/handlers/engine'
 import { IpcRendererEvent } from 'electron'
@@ -76,7 +77,7 @@ import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 
 const $q = useQuasar()
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const MAX_RETENTION_MS = 1000 * 60 * 60 * 12 // 12h local retention
 const BITRATE_SMOOTH_ALPHA = 0.55 // higher = closer to raw value
 
@@ -110,24 +111,6 @@ let chartTick: number | undefined
 const isFrozen = ref(false)
 const pendingStatistics = ref<ModuleExecutionStatisticsEventData[]>([])
 const pendingExecutionEvents = ref<ExecutionLogEntry[]>([])
-
-function humanBytesString (bytes: number, dp = 1) {
-  const thresh = 1024
-  if (Math.abs(bytes) < thresh) {
-    return `${bytes} B`
-  }
-
-  const units = ['kB', 'MB', 'GB', 'TB', 'PB', 'EB']
-  let u = -1
-  const r = 10 ** dp
-
-  do {
-    bytes /= thresh
-    ++u
-  } while (Math.round(Math.abs(bytes) * r) / r >= thresh && u < units.length - 1)
-
-  return `${bytes.toFixed(dp)} ${units[u]}`
-}
 
 const rawPoints = ref<Array<[number, number]>>([])
 const executionEvents = ref<ExecutionLogEntry[]>([])
@@ -300,7 +283,7 @@ const chartOptions = computed(() => {
                   background: '#c28f2c',
                   fontSize: '11px'
                 },
-                text: `${t('dashboard.chart.peak')}: ${humanBytesString(peakPoint.value[1])}/s`
+                text: `${t('dashboard.chart.peak')}: ${humanBitsString(peakPoint.value[1] * 8, 1, locale.value)}`
               }
             }
           ]
@@ -340,7 +323,7 @@ const chartOptions = computed(() => {
     },
     yaxis: {
       labels: {
-        formatter: (val: number) => `${humanBytesString(Math.max(0, val))}/s`,
+        formatter: (val: number) => humanBitsString(Math.max(0, val) * 8, 1, locale.value),
         style: {
           colors: mutedText
         }
@@ -357,16 +340,16 @@ const chartOptions = computed(() => {
           })
       },
       y: {
-        formatter: (value: number, ctx: { seriesIndex?: number, dataPointIndex?: number }) => {
-          const current = Math.max(0, value)
-          if (ctx?.seriesIndex === 0) {
-            const i = ctx?.dataPointIndex ?? -1
-            const prev = i > 0 ? displayedBitratePoints.value[i - 1]?.[1] ?? current : current
-            const delta = current - prev
-            const sign = delta > 0 ? '+' : ''
-            return `${humanBytesString(current)}/s (${sign}${humanBytesString(delta)}/s)`
-          }
-          return `${humanBytesString(current)}/s`
+          formatter: (value: number, ctx: { seriesIndex?: number, dataPointIndex?: number }) => {
+            const current = Math.max(0, value)
+            if (ctx?.seriesIndex === 0) {
+              const i = ctx?.dataPointIndex ?? -1
+              const prev = i > 0 ? displayedBitratePoints.value[i - 1]?.[1] ?? current : current
+              const delta = current - prev
+              const sign = delta > 0 ? '+' : ''
+              return `${humanBitsString(current * 8, 1, locale.value)} (${sign}${humanBitsString(delta * 8, 1, locale.value)})`
+            }
+            return humanBitsString(current * 8, 1, locale.value)
         }
       }
     },
@@ -448,12 +431,13 @@ function resumeLiveUpdates () {
 onMounted(async () => {
   await loadInitialState()
   chartTick = window.setInterval(() => {
-    if (!isFrozen.value) {
+    if (!isFrozen.value && !document.hidden) {
       nowTs.value = Date.now()
     }
   }, 1000)
   await window.executionEngineAPI.listenForStatistics(onStatisticsUpdate)
   await window.executionEngineAPI.listenForExecutionLog(onExecutionLogUpdate)
+  document.addEventListener('visibilitychange', onVisibilityChange)
 })
 
 onUnmounted(() => {
@@ -461,9 +445,18 @@ onUnmounted(() => {
     clearInterval(chartTick)
     chartTick = undefined
   }
+  document.removeEventListener('visibilitychange', onVisibilityChange)
   void window.executionEngineAPI.stopListeningForStatistics(onStatisticsUpdate)
   void window.executionEngineAPI.stopListeningForExecutionLog(onExecutionLogUpdate)
 })
+
+function onVisibilityChange () {
+  if (document.hidden) {
+    freezeLiveUpdates()
+  } else {
+    resumeLiveUpdates()
+  }
+}
 </script>
 
 <style scoped>
