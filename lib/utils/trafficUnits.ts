@@ -1,11 +1,11 @@
-const IEC_MULTIPLIERS: Record<string, number> = {
+const SI_MULTIPLIERS: Record<string, number> = {
   '': 1,
-  k: 1024,
-  m: 1024 ** 2,
-  g: 1024 ** 3,
-  t: 1024 ** 4,
-  p: 1024 ** 5,
-  e: 1024 ** 6
+  k: 1000,
+  m: 1000 ** 2,
+  g: 1000 ** 3,
+  t: 1000 ** 4,
+  p: 1000 ** 5,
+  e: 1000 ** 6
 }
 
 // eslint-disable-next-line no-control-regex
@@ -18,7 +18,7 @@ function normalizeUnitPrefix (rawUnit: string): string {
   }
 
   const prefix = normalized[0] ?? ''
-  return prefix in IEC_MULTIPLIERS ? prefix : ''
+  return prefix in SI_MULTIPLIERS ? prefix : ''
 }
 
 function isBitUnit (rawUnit: string): boolean {
@@ -34,7 +34,7 @@ function isBitUnit (rawUnit: string): boolean {
   return normalized.includes('bit')
 }
 
-// We store traffic in bytes and use IEC multipliers internally.
+// We store traffic in bytes and use SI multipliers internally (1000-based).
 // UI formatting intentionally stays unchanged and still shows the current labels.
 export function convertTrafficValueToBytes (value: string): number {
   const normalizedValue = value
@@ -55,7 +55,7 @@ export function convertTrafficValueToBytes (value: string): number {
 
   const unitPrefix = normalizeUnitPrefix(match[2] ?? '')
   const unitSuffix = match[3] ?? ''
-  const multiplier = IEC_MULTIPLIERS[unitPrefix] ?? 1
+  const multiplier = SI_MULTIPLIERS[unitPrefix] ?? 1
 
   if (isBitUnit(unitSuffix)) {
     return numericPart * multiplier / 8
